@@ -7,7 +7,7 @@ project(YXlsx VERSION 0.1.0 LANGUAGES CXX)
 if(APPLE)
     set(Qt6_DIR "/Users/ytx/Qt/6.9.2/macos/lib/cmake/Qt6" CACHE PATH "Qt6 cmake path")
 elseif(WIN32)
-    set(Qt6_DIR "C:/Qt/6.9.2/msvc2019_64/lib/cmake/Qt6" CACHE PATH "Qt6 cmake path")
+    set(Qt6_DIR "D:/Qt/6.9.2/mingw_64/lib/cmake/Qt6" CACHE PATH "Qt6 cmake path")
 endif()
 
 # ------------------------
@@ -69,6 +69,7 @@ target_compile_definitions(YXlsx PRIVATE
 target_link_libraries(YXlsx
     PUBLIC
         Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::GuiPrivate
 )
 
@@ -94,5 +95,6 @@ if(BUILD_DEMO)
             YXlsx
             Qt${QT_VERSION_MAJOR}::Core
             Qt${QT_VERSION_MAJOR}::Gui
+            Qt${QT_VERSION_MAJOR}::GuiPrivate
     )
 endif()
