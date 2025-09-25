@@ -30,7 +30,7 @@
 - Add it in CMakeLists:
 
       ```cmake
-      add_subdirectory(external/yxlsx/yxlsx/)
+      add_subdirectory(external/yxlsx/)
       ```
 
 ## **Acknowledgments**
