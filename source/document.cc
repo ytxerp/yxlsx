@@ -62,7 +62,7 @@ void Document::Init()
 bool Document::ParseXlsx(QIODevice* device)
 {
     ZipReader zip_reader(device);
-    const QStringList file_paths { zip_reader.GetFilePath() };
+    const QStringList& file_paths { zip_reader.GetFilePath() };
 
     // Load the Content_Types file
     if (!file_paths.contains(QStringLiteral("[Content_Types].xml")))
@@ -114,7 +114,7 @@ bool Document::ParseXlsx(QIODevice* device)
 
     const QString workbook_path { rels_xl[0].target };
     const auto parts { Utility::SplitPath(workbook_path) };
-    const QString workbook_dir { parts.first() };
+    const QString& workbook_dir { parts.first() };
     const QString rel_file_path { Utility::GetRelFilePath(workbook_path) };
 
     workbook_->GetRelationship()->ReadByteArray(zip_reader.GetFileData(rel_file_path));
@@ -177,7 +177,7 @@ bool Document::ComposeXlsx(QIODevice* device) const
         doc_props_app.AddHeading(QStringLiteral("Worksheets"), worksheets.size());
 
     for (int i = 0; i != worksheets.size(); ++i) {
-        auto sheet = worksheets[i];
+        const auto& sheet = worksheets[i];
         content_type_->AddWorksheetName(QStringLiteral("sheet%1").arg(i + 1));
         doc_props_app.AddTitle(sheet->GetSheetName());
 

@@ -84,7 +84,7 @@ void DocPropsApp::ComposeXml(QIODevice* device) const
     writer.writeNamespace(vt, QLatin1String("vt"));
 
     // Write basic properties
-    auto writeProperty = [&writer, this](QLatin1String key, QLatin1String default_value) {
+    auto writeProperty = [&writer, this](const QLatin1String& key, const QLatin1String& default_value) {
         auto it = property_hash_.constFind(key);
         writer.writeTextElement(key, it != property_hash_.constEnd() ? it.value() : default_value);
     };

@@ -43,7 +43,7 @@ class Workbook final : public AbstractOOXmlFile {
 
 public:
     explicit Workbook(OperationMode mode);
-    ~Workbook();
+    ~Workbook() override;
 
     QSharedPointer<AbstractSheet> AppendSheet(const QString& name = QString(), SheetType type = SheetType::kWorkSheet);
     QSharedPointer<AbstractSheet> InsertSheet(int index, const QString& name = QString(), SheetType type = SheetType::kWorkSheet);

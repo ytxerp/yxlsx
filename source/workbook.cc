@@ -403,16 +403,24 @@ void Workbook::ParseBookViews(QXmlStreamReader& reader)
 {
     Q_ASSERT(reader.name() == QStringLiteral("bookviews"));
 
-    while (!reader.atEnd() && !(reader.name() == QStringLiteral("bookviews") && reader.tokenType() == QXmlStreamReader::EndElement)) {
-        if (reader.readNextStartElement() && reader.name() == QStringLiteral("workbookView")) {
-            const auto attributes { reader.attributes() };
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QStringLiteral("workbookView")) {
+            const auto attributes = reader.attributes();
 
             x_window_ = GetXmlAttribute(attributes, QLatin1String("xWindow")).toInt();
             y_window_ = GetXmlAttribute(attributes, QLatin1String("yWindow")).toInt();
             window_width_ = GetXmlAttribute(attributes, QLatin1String("windowWidth")).toInt();
             window_height_ = GetXmlAttribute(attributes, QLatin1String("windowHeight")).toInt();
             current_sheet_index_ = GetXmlAttribute(attributes, QLatin1String("activeTab")).toInt();
+
+            reader.skipCurrentElement();
+        } else {
+            reader.skipCurrentElement();
         }
+    }
+
+    if (reader.hasError()) {
+        qWarning() << "XML Parsing Error in bookviews:" << reader.errorString();
     }
 }
 

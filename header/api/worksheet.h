@@ -45,8 +45,8 @@ concept Container = std::ranges::range<T> && requires(T t) {
 
 class Worksheet final : public AbstractSheet {
 public:
-    Worksheet(const QString& sheet_name, int sheet_id, QSharedPointer<SharedString> shared_strings, SheetType sheet_type);
-    ~Worksheet();
+    Worksheet(const QString& sheet_name, int sheet_id, const QSharedPointer<SharedString>& shared_strings, SheetType sheet_type);
+    ~Worksheet() override;
 
 public:
     QVariant Read(const Coordinate& coordinate) const;

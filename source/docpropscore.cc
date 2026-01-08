@@ -81,7 +81,7 @@ void DocPropsCore::ComposeXml(QIODevice* device) const
     it = property_hash_.constFind(QStringLiteral("lastModifiedBy"));
     writer.writeTextElement(kCoreProperties, QLatin1String("lastModifiedBy"), it != property_hash_.constEnd() ? it.value() : QLatin1String("YXlsx Library"));
 
-    auto WriteTimeElement = [&](QLatin1String name, const QString& value) {
+    auto WriteTimeElement = [&](const QLatin1String& name, const QString& value) {
         writer.writeStartElement(kPLTerms, name);
         writer.writeAttribute(kW3SchemaInstance, QLatin1String("type"), QLatin1String("dcterms:W3CDTF"));
         writer.writeCharacters(value);
