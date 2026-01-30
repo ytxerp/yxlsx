@@ -34,7 +34,6 @@ class Document final : public QObject {
 public:
     explicit Document(QObject* parent = nullptr);
     explicit Document(const QString& xlsx_name, QObject* parent = nullptr);
-    ~Document() override { };
 
     QString GetProperty(const QString& key) const;
     void SetProperty(const QString& key, const QString& property);
