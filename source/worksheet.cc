@@ -70,7 +70,7 @@ void Worksheet::CalculateSpans() const
 
 QString Worksheet::ComposeDimension() const
 {
-    if (!dimension_.CheckValid())
+    if (!dimension_.IsValid())
         return QStringLiteral("A1");
     else
         return dimension_.ComposeDimension();
@@ -82,7 +82,7 @@ QString Worksheet::ComposeDimension() const
  */
 bool Worksheet::UpdateDimension(int row, int col)
 {
-    if (!Utility::CheckCoordinateValid(row, col))
+    if (!Utility::IsValidRowColumn(row, col))
         return false;
 
     Q_ASSERT_X(row > 0, "UpdateDimension", "Row index must be 1 or greater.");
@@ -119,7 +119,7 @@ Worksheet::~Worksheet() { }
  */
 bool Worksheet::Write(int row, int column, const QVariant& data)
 {
-    if (!Utility::CheckCoordinateValid(row, column))
+    if (!Utility::IsValidRowColumn(row, column))
         return false;
 
     if (data.isNull() || !UpdateDimension(row, column)) {
@@ -166,7 +166,7 @@ CellType Worksheet::DetermineCellType(const QVariant& value) const
 bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data)
 {
     // Ensure the coordinate is valid before proceeding
-    if (!Coordinate::CheckValid(coordinate))
+    if (!Coordinate::IsValid(coordinate))
         return false;
 
     // Delegate to the row-column-based Write method
@@ -181,7 +181,7 @@ bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data)
 QVariant Worksheet::Read(const Coordinate& coordinate) const
 {
     // Check if the provided coordinate is valid
-    if (!Coordinate::CheckValid(coordinate))
+    if (!Coordinate::IsValid(coordinate))
         return QVariant();
 
     // Delegate to the row and column-based Read function
@@ -219,9 +219,7 @@ bool Worksheet::WriteBlank(int row, int column)
 void Worksheet::ComposeXml(QIODevice* device) const
 {
     relationship_->Clear();
-
     QXmlStreamWriter writer(device);
-
     writer.writeStartDocument(QLatin1String("1.0"), true);
     writer.writeStartElement(QLatin1String("worksheet"));
     writer.writeAttribute(QLatin1String("xmlns"), QLatin1String("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
@@ -242,8 +240,20 @@ void Worksheet::ComposeXml(QIODevice* device) const
     writer.writeAttribute(QLatin1String("defaultColWidth"), QString::number(sheet_format_props_.default_col_width));
     writer.writeEndElement(); // sheetFormatPr
 
+    // -------------------
+    // Add column definitions for shrinkToFit to work
+    // -------------------
+    writer.writeStartElement(QLatin1String("cols"));
+    writer.writeStartElement(QLatin1String("col"));
+    writer.writeAttribute(QLatin1String("min"), QLatin1String("1"));
+    writer.writeAttribute(QLatin1String("max"), QLatin1String("16384")); // Excel max columns
+    writer.writeAttribute(QLatin1String("width"), QLatin1String("12"));
+    writer.writeAttribute(QLatin1String("customWidth"), QLatin1String("1"));
+    writer.writeEndElement(); // col
+    writer.writeEndElement(); // cols
+
     writer.writeStartElement(QLatin1String("sheetData"));
-    if (dimension_.CheckValid())
+    if (dimension_.IsValid())
         ComposeSheet(writer);
     writer.writeEndElement(); // sheetData
 
@@ -306,6 +316,11 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
 
     writer.writeStartElement(QLatin1String("c"));
     writer.writeAttribute(QLatin1String("r"), coord);
+
+    // -------------------
+    // Set style index to small font + shrinkToFit
+    // -------------------
+    writer.writeAttribute(QLatin1String("s"), QString::number(1)); // All cells use shrinkToFit style
 
     switch (cell->type) {
     case CellType::kSharedString: { // 's'

@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     }
 
     workbook4->AppendSheet();
-    workbook4->GetCurrentWorksheet()->Write(2, 2, "Hello Qt Xlsx");
+    workbook4->GetCurrentWorksheet()->Write(2, 2, "这是一段非常非常非常长的文本，用来测试shrinkToFit自动缩小字体功能是否正常工作");
 
     workbook4->AppendSheet();
     workbook4->GetCurrentWorksheet()->Write(3, 3, "This will be deleted...");

@@ -40,7 +40,7 @@ public:
 
     QString ComposeDimension(bool row_abs = false, bool col_abs = false) const;
 
-    inline bool CheckValid() const { return Utility::CheckDimensionValid(top_row_, left_column_, bottom_row_, right_column_); }
+    inline bool IsValid() const { return Utility::IsValidCellRange(top_row_, left_column_, bottom_row_, right_column_); }
 
     inline int TopRow() const { return top_row_; }
     inline int BottomRow() const { return bottom_row_; }

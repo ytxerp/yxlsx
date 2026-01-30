@@ -98,7 +98,7 @@ target_include_directories(
 # ------------------------
 # Demo / Test target (optional)
 # ------------------------
-option(BUILD_DEMO "Build YXlsx demo executable" ON)
+option(BUILD_DEMO "Build YXlsx demo executable" OFF)
 
 if(BUILD_DEMO)
     add_executable(yxlsx_demo main.cpp)

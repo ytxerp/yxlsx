@@ -45,21 +45,27 @@ Dimension::Dimension(const char* dimension) { Init(QString::fromLatin1(dimension
 
 void Dimension::Init(const QString& dimension)
 {
+    // Reset to invalid first
+    top_row_ = kInvalidValue;
+    left_column_ = kInvalidValue;
+    bottom_row_ = kInvalidValue;
+    right_column_ = kInvalidValue;
+
     // Split the dimension string by ':' into parts.
     const QStringList parts { dimension.split(QLatin1Char(':'), Qt::SkipEmptyParts) };
 
     // Check if the dimension string is empty or contains more than two parts (invalid format).
-    if (parts.isEmpty() || parts.size() >= 3) {
+    if (parts.isEmpty() || parts.size() > 2) {
         qWarning() << "Invalid dimension string:" << dimension;
         return;
     }
 
     // Parse the start and end coordinates.
     // If there is only one part, the start and end coordinates will be the same.
-    std::pair<int, int> start { Utility::ParseCoordinate(parts.first()) };
-    std::pair<int, int> end { Utility::ParseCoordinate(parts.size() == 2 ? parts.last() : parts.first()) };
+    const auto start { Utility::ParseCoordinate(parts.first()) };
+    const auto end { Utility::ParseCoordinate(parts.size() == 2 ? parts.last() : parts.first()) };
 
-    if (!Utility::CheckDimensionValid(start.first, start.second, end.first, end.second)) {
+    if (!Utility::IsValidCellRange(start.first, start.second, end.first, end.second)) {
         qWarning() << "Invalid dimension coordinates." << dimension;
         return;
     }
@@ -73,18 +79,18 @@ void Dimension::Init(const QString& dimension)
 
 QString Dimension::ComposeDimension(bool row_abs, bool col_abs) const
 {
-    if (!CheckValid()) {
+    if (!IsValid()) {
         return {};
     }
 
-    const QString top { Utility::ComposeCoordinate(top_row_, left_column_, row_abs, col_abs) };
+    const QString start { Utility::ComposeCoordinate(top_row_, left_column_, row_abs, col_abs) };
 
     if (top_row_ == bottom_row_ && left_column_ == right_column_) {
-        return top;
+        return start;
     }
 
-    const QString bottom { Utility::ComposeCoordinate(bottom_row_, right_column_, row_abs, col_abs) };
-    return QStringLiteral("%1:%2").arg(top, bottom);
+    const QString end { Utility::ComposeCoordinate(bottom_row_, right_column_, row_abs, col_abs) };
+    return QStringLiteral("%1:%2").arg(start, end);
 }
 
 QT_END_NAMESPACE_YXLSX

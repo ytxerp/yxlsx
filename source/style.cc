@@ -39,37 +39,103 @@ void Style::ComposeXml(QIODevice* device) const
     QXmlStreamWriter writer(device);
     writer.writeStartDocument();
 
-    // Start the styleSheet element with the necessary namespace
     writer.writeStartElement(QLatin1String("styleSheet"));
     writer.writeDefaultNamespace(QLatin1String("http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
 
-    // Write <numFmts> element (Optional: Only include if you need custom number formats)
-    writer.writeStartElement(QLatin1String("numFmts"));
-    writer.writeAttribute(QLatin1String("count"), QLatin1String("1"));
-    writer.writeStartElement(QLatin1String("numFmt"));
-    writer.writeAttribute(QLatin1String("numFmtId"), QLatin1String("164")); // General format
-    writer.writeAttribute(QLatin1String("formatCode"), QLatin1String("General"));
-    writer.writeEndElement(); // numFmt
-    writer.writeEndElement(); // numFmts
+    // -------------------
+    // Fonts
+    // -------------------
+    writer.writeStartElement(QLatin1String("fonts"));
+    writer.writeAttribute(QLatin1String("count"), QLatin1String("2"));
 
-    // Write <borders> element (Defines a border style, here an empty one)
+    // Default font (11pt)
+    writer.writeStartElement(QLatin1String("font"));
+    writer.writeTextElement(QLatin1String("sz"), QLatin1String("11"));
+    writer.writeTextElement(QLatin1String("name"), QLatin1String("Calibri"));
+    writer.writeEndElement(); // font
+
+    // Small font (8pt)
+    writer.writeStartElement(QLatin1String("font"));
+    writer.writeTextElement(QLatin1String("sz"), QLatin1String("8"));
+    writer.writeTextElement(QLatin1String("name"), QLatin1String("Calibri"));
+    writer.writeEndElement(); // font
+
+    writer.writeEndElement(); // fonts
+
+    // -------------------
+    // Fills
+    // -------------------
+    writer.writeStartElement(QLatin1String("fills"));
+    writer.writeAttribute(QLatin1String("count"), QLatin1String("2"));
+
+    // First fill must be "none"
+    writer.writeStartElement(QLatin1String("fill"));
+    writer.writeEmptyElement(QLatin1String("patternFill"));
+    writer.writeAttribute(QLatin1String("patternType"), QLatin1String("none"));
+    writer.writeEndElement(); // fill
+
+    // Second fill must be "gray125"
+    writer.writeStartElement(QLatin1String("fill"));
+    writer.writeStartElement(QLatin1String("patternFill"));
+    writer.writeAttribute(QLatin1String("patternType"), QLatin1String("gray125"));
+    writer.writeEndElement(); // patternFill
+    writer.writeEndElement(); // fill
+
+    writer.writeEndElement(); // fills
+
+    // -------------------
+    // Borders
+    // -------------------
     writer.writeStartElement(QLatin1String("borders"));
     writer.writeAttribute(QLatin1String("count"), QLatin1String("1"));
-    writer.writeEmptyElement(QLatin1String("border")); // Empty border definition
+    writer.writeEmptyElement(QLatin1String("border"));
     writer.writeEndElement(); // borders
 
-    // Write <cellXfs> element (Defines the text style without font and size)
-    writer.writeStartElement(QLatin1String("cellXfs"));
+    // -------------------
+    // Critical fix: Add cellStyleXfs
+    // -------------------
+    writer.writeStartElement(QLatin1String("cellStyleXfs"));
     writer.writeAttribute(QLatin1String("count"), QLatin1String("1"));
     writer.writeStartElement(QLatin1String("xf"));
-    writer.writeAttribute(QLatin1String("numFmtId"), QLatin1String("0")); // Default number format (General)
-    writer.writeAttribute(QLatin1String("borderId"), QLatin1String("0")); // First (and only) border
+    writer.writeAttribute(QLatin1String("numFmtId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("fontId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("fillId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("borderId"), QLatin1String("0"));
+    writer.writeEndElement(); // xf
+    writer.writeEndElement(); // cellStyleXfs
+
+    // -------------------
+    // CellXfs
+    // -------------------
+    writer.writeStartElement(QLatin1String("cellXfs"));
+    writer.writeAttribute(QLatin1String("count"), QLatin1String("2"));
+
+    // Default XF
+    writer.writeStartElement(QLatin1String("xf"));
+    writer.writeAttribute(QLatin1String("numFmtId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("fontId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("fillId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("borderId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("xfId"), QLatin1String("0")); // Reference to cellStyleXfs
+    writer.writeEndElement(); // xf
+
+    // XF with small font + shrinkToFit
+    writer.writeStartElement(QLatin1String("xf"));
+    writer.writeAttribute(QLatin1String("numFmtId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("fontId"), QLatin1String("1"));
+    writer.writeAttribute(QLatin1String("fillId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("borderId"), QLatin1String("0"));
+    writer.writeAttribute(QLatin1String("xfId"), QLatin1String("0")); // Reference to cellStyleXfs
+    writer.writeAttribute(QLatin1String("applyAlignment"), QLatin1String("1"));
+
+    writer.writeStartElement(QLatin1String("alignment"));
+    writer.writeAttribute(QLatin1String("shrinkToFit"), QLatin1String("1"));
+    writer.writeEndElement(); // alignment
+
     writer.writeEndElement(); // xf
     writer.writeEndElement(); // cellXfs
 
-    // End the styleSheet element
     writer.writeEndElement(); // styleSheet
-
     writer.writeEndDocument();
 }
 

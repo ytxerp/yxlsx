@@ -35,16 +35,15 @@ QT_BEGIN_NAMESPACE_YXLSX
 // https://ecma-international.org/publications-and-standards/standards/ecma-376/
 enum class CellType { kBoolean, kDate, kNumber, kSharedString, kUnknown };
 
+// Cell is a lightweight value container.
+// - No formulas
+// - No formatting
+// - Strings are always stored as shared strings
+// - Date is a semantic type, not a number format
 struct Cell {
     explicit Cell(const QVariant& value = {}, CellType type = CellType::kNumber)
         : type { type }
         , value { value }
-    {
-    }
-
-    explicit Cell(const Cell* const cell)
-        : type { cell ? cell->type : CellType::kNumber }
-        , value { cell ? cell->value : QVariant {} }
     {
     }
 
@@ -53,4 +52,7 @@ struct Cell {
 };
 
 QT_END_NAMESPACE_YXLSX
+
+Q_DECLARE_TYPEINFO(YXlsx::Cell, Q_MOVABLE_TYPE);
+
 #endif // YXLSX_CELL_H

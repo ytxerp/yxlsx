@@ -41,10 +41,10 @@ public:
 
     static bool IsSpaceReserveNeeded(const QString& string);
 
-    static constexpr bool CheckCoordinateValid(int row, int column) { return row >= 1 && row <= kExcelRowMax && column >= 1 && column <= kExcelColumnMax; }
-    static bool CheckDimensionValid(int top_row, int left_column, int bottom_row, int right_column)
+    static constexpr bool IsValidRowColumn(int row, int column) { return row >= 1 && row <= kExcelRowMax && column >= 1 && column <= kExcelColumnMax; }
+    static bool IsValidCellRange(int top_row, int left_column, int bottom_row, int right_column)
     {
-        return Utility::CheckCoordinateValid(top_row, left_column) && Utility::CheckCoordinateValid(bottom_row, right_column) && top_row <= bottom_row
+        return Utility::IsValidRowColumn(top_row, left_column) && Utility::IsValidRowColumn(bottom_row, right_column) && top_row <= bottom_row
             && left_column <= right_column;
     }
 

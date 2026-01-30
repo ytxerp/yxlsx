@@ -42,13 +42,16 @@ Coordinate::Coordinate(const char* coordinate) { Init(QString::fromLatin1(coordi
 
 void Coordinate::Init(const QString& coordinate)
 {
+    row_ = kInvalidValue;
+    column_ = kInvalidValue;
+
     if (coordinate.isEmpty())
         return;
 
     // Parse the coordinate string into row and column using Utility::ParseCoordinate
-    std::pair<int, int> coord { Utility::ParseCoordinate(coordinate) };
+    auto coord { Utility::ParseCoordinate(coordinate) };
 
-    if (!Utility::CheckCoordinateValid(coord.first, coord.second)) {
+    if (!Utility::IsValidRowColumn(coord.first, coord.second)) {
         qWarning() << "Invalid coordinate:" << coordinate << "Row:" << coord.first << "Column:" << coord.second;
         return;
     }
@@ -56,12 +59,6 @@ void Coordinate::Init(const QString& coordinate)
     // Assign the parsed row and column values
     row_ = coord.first;
     column_ = coord.second;
-}
-
-Coordinate::Coordinate(const Coordinate& other)
-    : row_(other.row_)
-    , column_(other.column_)
-{
 }
 
 QT_END_NAMESPACE_YXLSX

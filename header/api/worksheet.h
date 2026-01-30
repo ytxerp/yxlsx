@@ -57,7 +57,7 @@ public:
 
     template <Container T> inline bool WriteColumn(int row, int column, const T& container)
     {
-        if (container.size() == 0 || !Utility::CheckCoordinateValid(row, column)) {
+        if (container.size() == 0 || !Utility::IsValidRowColumn(row, column)) {
             qWarning() << "Data is empty for column write.";
             return false;
         }
@@ -92,7 +92,7 @@ public:
 
     template <Container T> inline bool WriteRow(int row, int column, const T& container)
     {
-        if (container.size() == 0 || !Utility::CheckCoordinateValid(row, column)) {
+        if (container.size() == 0 || !Utility::IsValidRowColumn(row, column)) {
             qWarning() << "Data is empty for row write.";
             return false;
         }

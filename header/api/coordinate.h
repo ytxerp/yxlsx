@@ -33,12 +33,10 @@ QT_BEGIN_NAMESPACE_YXLSX
 class Coordinate {
 public:
     Coordinate() = default;
-    ~Coordinate() = default;
 
-    Coordinate(int row, int column);
+    explicit Coordinate(int row, int column);
     Coordinate(const QString& coordinate);
     Coordinate(const char* coordinate);
-    Coordinate(const Coordinate& other);
 
     inline void SetRow(int row) { row_ = row; }
     inline void SetColumn(int col) { column_ = col; }
@@ -46,9 +44,9 @@ public:
     inline int Column() const { return column_; }
 
     inline bool operator==(const Coordinate& other) const { return row_ == other.row_ && column_ == other.column_; }
-    inline bool operator!=(const Coordinate& other) const { return row_ != other.row_ || column_ != other.column_; }
+    inline bool operator!=(const Coordinate& other) const { return !(*this == other); }
 
-    static constexpr bool CheckValid(const Coordinate& coordinate) { return Utility::CheckCoordinateValid(coordinate.Row(), coordinate.Column()); }
+    static constexpr bool IsValid(const Coordinate& coordinate) { return Utility::IsValidRowColumn(coordinate.Row(), coordinate.Column()); }
 
 private:
     void Init(const QString& coordinate);
