@@ -15,7 +15,7 @@ if(APPLE)
     )
 elseif(WIN32)
     set(Qt6_DIR
-        "D:/Qt/6.9.3/mingw_64/lib/cmake/Qt6"
+        "D:/Qt/6.9.3/llvm-mingw_64/lib/cmake/Qt6"
         CACHE PATH "Qt6 cmake path"
     )
 endif()
