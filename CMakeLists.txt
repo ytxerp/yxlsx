@@ -8,8 +8,7 @@ project(
 # ------------------------
 # Find required Qt6 modules
 # ------------------------
-find_package(Qt6 REQUIRED COMPONENTS Gui Core)
-find_package(Qt6 OPTIONAL_COMPONENTS GuiPrivate)
+find_package(Qt6 REQUIRED COMPONENTS Gui Core GuiPrivate)
 
 # ------------------------
 # Standard Qt project setup (Qt 6.9 or higher)
