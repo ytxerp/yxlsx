@@ -27,6 +27,7 @@ add_compile_options(
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Position Independent Code for shared library
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # ------------------------
 # Source and header files
