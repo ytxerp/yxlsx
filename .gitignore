@@ -357,6 +357,7 @@ paket-files/
 .cr/personal
 
 # Python Tools for Visual Studio (PTVS)
+/.qtcreator/*
 __pycache__/
 *.pyc
 

@@ -6,24 +6,10 @@ project(
 )
 
 # ------------------------
-# Set Qt6 location manually if not found automatically
-# ------------------------
-if(APPLE)
-    set(Qt6_DIR
-        "/Users/ytx/Qt/6.9.3/macos/lib/cmake/Qt6"
-        CACHE PATH "Qt6 cmake path"
-    )
-elseif(WIN32)
-    set(Qt6_DIR
-        "D:/Qt/6.9.3/llvm-mingw_64/lib/cmake/Qt6"
-        CACHE PATH "Qt6 cmake path"
-    )
-endif()
-
-# ------------------------
 # Find required Qt6 modules
 # ------------------------
 find_package(Qt6 REQUIRED COMPONENTS Gui Core)
+find_package(Qt6 OPTIONAL_COMPONENTS GuiPrivate)
 
 # ------------------------
 # Standard Qt project setup (Qt 6.9 or higher)
