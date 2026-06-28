@@ -96,21 +96,21 @@ bool ContentType::ParseXml(QIODevice* device)
     override_hash_.clear();
 
     QXmlStreamReader reader(device);
-    while (!reader.atEnd() && !reader.hasError()) {
-        if (!reader.readNextStartElement())
-            continue;
 
+    while (reader.readNextStartElement()) {
         const auto name { reader.name() };
-
         if (name == QStringLiteral("Default")) {
             ParseElement(reader.attributes(), default_hash_, QStringLiteral("Extension"), QStringLiteral("ContentType"));
         } else if (name == QStringLiteral("Override")) {
             ParseElement(reader.attributes(), override_hash_, QStringLiteral("PartName"), QStringLiteral("ContentType"));
+        } else {
+            reader.skipCurrentElement();
         }
     }
 
     if (reader.hasError()) {
         qDebug() << reader.errorString();
+        return false;
     }
 
     return true;

@@ -136,22 +136,18 @@ bool DocPropsApp::ParseXml(QIODevice* device)
 {
     QXmlStreamReader reader(device);
 
-    while (!reader.atEnd() && !reader.hasError()) {
-        if (!reader.readNextStartElement())
-            continue;
-
+    while (reader.readNextStartElement()) {
         const auto name { reader.name() };
-
-        if (name == QStringLiteral("Manager")) {
-            SetProperty(QStringLiteral("manager"), reader.readElementText());
-        } else if (name == QStringLiteral("Company")) {
-            SetProperty(QStringLiteral("company"), reader.readElementText());
-        } else if (name == QStringLiteral("Application")) {
+        if (name == QStringLiteral("Application")) {
             SetProperty(QStringLiteral("Application"), reader.readElementText());
         } else if (name == QStringLiteral("DocSecurity")) {
             SetProperty(QStringLiteral("DocSecurity"), reader.readElementText());
         } else if (name == QStringLiteral("ScaleCrop")) {
             SetProperty(QStringLiteral("ScaleCrop"), reader.readElementText());
+        } else if (name == QStringLiteral("Manager")) {
+            SetProperty(QStringLiteral("Manager"), reader.readElementText());
+        } else if (name == QStringLiteral("Company")) {
+            SetProperty(QStringLiteral("Company"), reader.readElementText());
         } else if (name == QStringLiteral("LinksUpToDate")) {
             SetProperty(QStringLiteral("LinksUpToDate"), reader.readElementText());
         } else if (name == QStringLiteral("SharedDoc")) {
@@ -160,11 +156,13 @@ bool DocPropsApp::ParseXml(QIODevice* device)
             SetProperty(QStringLiteral("HyperlinksChanged"), reader.readElementText());
         } else if (name == QStringLiteral("AppVersion")) {
             SetProperty(QStringLiteral("AppVersion"), reader.readElementText());
+        } else {
+            reader.skipCurrentElement();
         }
     }
 
     if (reader.hasError()) {
-        qDebug() << "DocPropsApp Error reading doc props app file:" << reader.errorString();
+        qDebug() << "DocPropsApp ParseXml error:" << reader.errorString();
         return false;
     }
 

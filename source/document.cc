@@ -140,7 +140,7 @@ bool Document::ParseXlsx(QIODevice* device)
     if (!rels_sharedStrings.isEmpty()) {
         // In normal case this should be sharedStrings.xml which in xl
         const QString name { rels_sharedStrings[0].target };
-        const QString path { workbook_dir + QStringLiteral("/") + name };
+        const QString path { (workbook_dir == QStringLiteral(".")) ? name : workbook_dir + QStringLiteral("/") + name };
         workbook_->GetSharedString()->ParseByteArray(zip_reader.GetFileData(path));
     }
 

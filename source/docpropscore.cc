@@ -67,7 +67,7 @@ void DocPropsCore::ComposeXml(QIODevice* device) const
     QXmlStreamWriter writer(device);
 
     writer.writeStartDocument(QLatin1String("1.0"), true);
-    writer.writeStartElement(QLatin1String("cp:coreProperties"));
+    writer.writeStartElement(kCoreProperties, QLatin1String("coreProperties"));
 
     writer.writeNamespace(kCoreProperties, QLatin1String("cp"));
     writer.writeNamespace(kPLElements, QLatin1String("dc"));
@@ -100,21 +100,20 @@ bool DocPropsCore::ParseXml(QIODevice* device)
 {
     QXmlStreamReader reader(device);
 
-    while (!reader.atEnd() && !reader.hasError()) {
-        if (!reader.readNextStartElement())
-            continue;
-
+    while (reader.readNextStartElement()) {
         const auto namespace_uri { reader.namespaceUri().toString() };
         const auto name { reader.name().toString() };
 
         auto it = kElementNamespaceHash.constFind(name);
         if (it != kElementNamespaceHash.constEnd() && it.value() == namespace_uri) {
             SetProperty(name, reader.readElementText());
+        } else {
+            reader.skipCurrentElement();
         }
     }
 
     if (reader.hasError()) {
-        qDebug() << "DocPropsCore Error reading doc props app file:" << reader.errorString();
+        qDebug() << "DocPropsCore ParseXml error:" << reader.errorString();
         return false;
     }
 

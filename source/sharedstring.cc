@@ -113,7 +113,7 @@ void SharedString::ComposeXml(QIODevice* device) const
     writer.writeStartDocument(QLatin1String("1.0"), true);
 
     // Calculate the total reference count
-    int total_count = std::accumulate(
+    const int total_count = std::accumulate(
         string_coordinate_hash_.cbegin(), string_coordinate_hash_.cend(), 0, [](int sum, const QSet<QPair<int, int>>& set) { return sum + set.size(); });
 
     // Write root element <sst>
@@ -124,21 +124,20 @@ void SharedString::ComposeXml(QIODevice* device) const
 
     // Write each shared string
     for (const QString& string : string_list_) {
-        writer.writeStartElement(QLatin1String("si")); // <si>
-        writer.writeStartElement(QLatin1String("t")); // <t>
+        writer.writeStartElement(QLatin1String("si"));
+        writer.writeStartElement(QLatin1String("t"));
 
         // Add xml:space attribute if needed
         if (Utility::IsSpaceReserveNeeded(string)) {
-            writer.writeAttribute(QLatin1String("xml:space"), QLatin1String("preserve"));
+            writer.writeAttribute(QLatin1String("http://www.w3.org/XML/1998/namespace"), QLatin1String("space"), QLatin1String("preserve"));
         }
-
-        writer.writeCharacters(string); // Write string content
+        writer.writeCharacters(string);
         writer.writeEndElement(); // </t>
         writer.writeEndElement(); // </si>
     }
 
     writer.writeEndElement(); // </sst>
-    writer.writeEndDocument(); // End document
+    writer.writeEndDocument();
 }
 
 void SharedString::ParseSharedString(QXmlStreamReader& reader)
@@ -147,9 +146,18 @@ void SharedString::ParseSharedString(QXmlStreamReader& reader)
 
     QString string {};
 
-    while (!reader.atEnd() && !(reader.tokenType() == QXmlStreamReader::EndElement && reader.name() == QStringLiteral("si"))) {
-        if (reader.readNextStartElement() && reader.name() == QStringLiteral("t")) {
+    // readNextStartElement() automatically returns false and exits safely
+    // when it encounters the corresponding closing tag </si>
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QStringLiteral("t")) {
             string += reader.readElementText();
+            // readElementText() consumes the text and automatically advances the reader past </t>
+        } else if (reader.name() == QStringLiteral("r")) {
+            // Rich text run container. Do nothing and let the loop continue;
+            // the next readNextStartElement() call will dive inside <r> to find the nested <t>
+        } else {
+            // Skip any other unconcerned elements safely
+            reader.skipCurrentElement();
         }
     }
 
@@ -164,14 +172,10 @@ bool SharedString::ParseXml(QIODevice* device)
 {
     QXmlStreamReader reader(device);
     qsizetype unique_count = 0;
-    bool has_unique_count_attr = true;
+    bool has_unique_count_attr = false;
 
-    while (!reader.atEnd() && !reader.hasError()) {
-        if (!reader.readNextStartElement())
-            continue;
-
+    while (reader.readNextStartElement()) {
         if (reader.name() == QStringLiteral("sst")) {
-            // Process root <sst> node, check for 'uniqueCount' attribute
             const auto attributes { reader.attributes() };
             if ((has_unique_count_attr = attributes.hasAttribute(QLatin1String("uniqueCount")))) {
                 bool ok = false;
@@ -181,9 +185,11 @@ bool SharedString::ParseXml(QIODevice* device)
                     return false;
                 }
             }
+            // Let the loop descend into <sst>'s children
         } else if (reader.name() == QStringLiteral("si")) {
-            // Process shared string node <si>
             ParseSharedString(reader);
+        } else {
+            reader.skipCurrentElement();
         }
     }
 
