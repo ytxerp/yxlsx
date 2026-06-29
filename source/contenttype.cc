@@ -47,6 +47,8 @@ void ContentType::AddDocPropCore() { AddOverride(QStringLiteral("/docProps/core.
 
 void ContentType::AddStyles() { AddOverride(QStringLiteral("/xl/styles.xml"), document_prefix_ + QStringLiteral("spreadsheetml.styles+xml")); }
 
+void ContentType::AddTheme() { AddOverride(QStringLiteral("/xl/theme/theme1.xml"), document_prefix_ + QStringLiteral("theme+xml")); }
+
 void ContentType::AddWorkbook() { AddOverride(QStringLiteral("/xl/workbook.xml"), document_prefix_ + QStringLiteral("spreadsheetml.sheet.main+xml")); }
 
 void ContentType::AddWorksheetName(const QString& name)

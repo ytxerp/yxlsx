@@ -33,6 +33,7 @@ YXLSX_BEGIN_NAMESPACE
 Workbook::Workbook(OperationMode mode)
     : shared_string_ { QSharedPointer<SharedString>::create(mode) }
     , style_ { QSharedPointer<Style>::create(mode) }
+    , theme_ { QSharedPointer<Theme>::create(mode) }
     , x_window_ { 240 }
     , y_window_ { 15 }
     , window_width_ { 16095 }

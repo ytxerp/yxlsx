@@ -130,9 +130,17 @@ bool Document::ParseXlsx(QIODevice* device)
         // dev34
         const QString path { (workbook_dir == QStringLiteral(".")) ? name : workbook_dir + QStringLiteral("/") + name };
 
-        QSharedPointer<Style> styles { QSharedPointer<Style>::create(OperationMode::kLoadExisting) };
-        styles->ParseByteArray(zip_reader.GetFileData(path));
-        workbook_->GetStyle() = styles;
+        workbook_->GetStyle()->ParseByteArray(zip_reader.GetFileData(path));
+    }
+
+    // load theme
+    QList<Relationship> rels_theme { workbook_->GetRelationship()->GetDocumentRelationship(QStringLiteral("/theme")) };
+    if (!rels_theme.isEmpty()) {
+        // In normal case this should be theme/theme1.xml which in xl
+        const QString name = rels_theme[0].target;
+        const QString path = workbook_dir + QLatin1String("/") + name;
+
+        workbook_->GetTheme()->ParseByteArray(zip_reader.GetFileData(path));
     }
 
     // load sharedStrings
@@ -213,6 +221,10 @@ bool Document::ComposeXlsx(QIODevice* device) const
     // save styles xml file
     content_type_->AddStyles();
     zip_writer.AddFile(QStringLiteral("xl/styles.xml"), workbook_->GetStyle()->ComposeByteArray());
+
+    // save theme xml file
+    content_type_->AddTheme();
+    zip_writer.AddFile(QStringLiteral("xl/theme/theme1.xml"), workbook_->GetTheme()->ComposeByteArray());
 
     // save root .rels xml file
     RelationshipMgr rootrels;

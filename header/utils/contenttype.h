@@ -45,6 +45,7 @@ public:
     void AddDocPropCore();
     void AddDocPropApp();
     void AddStyles();
+    void AddTheme();
     void AddWorkbook();
     void AddWorksheetName(const QString& name);
     void AddSharedString();

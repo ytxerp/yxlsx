@@ -34,6 +34,7 @@
 #include "namespace.h"
 #include "sharedstring.h"
 #include "style.h"
+#include "theme.h"
 #include "worksheet.h"
 
 YXLSX_BEGIN_NAMESPACE
@@ -66,6 +67,7 @@ public:
 
     QSharedPointer<SharedString> GetSharedString() const { return shared_string_; }
     QSharedPointer<Style> GetStyle() { return style_; }
+    QSharedPointer<Theme> GetTheme() { return theme_; }
     QList<QSharedPointer<AbstractSheet>> GetSheetByType(SheetType type) const;
 
 private:
@@ -95,6 +97,7 @@ private:
 private:
     QSharedPointer<SharedString> shared_string_ {};
     QSharedPointer<Style> style_ {};
+    QSharedPointer<Theme> theme_ {};
 
     QStringList sheet_name_list_ {};
     QList<DefinedName> defined_name_list_ {};
