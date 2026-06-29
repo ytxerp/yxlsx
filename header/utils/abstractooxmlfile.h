@@ -36,7 +36,7 @@
 #include "namespace.h"
 #include "relationshipmgr.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 enum class OperationMode { kCreateNew, kLoadExisting };
 
@@ -64,6 +64,6 @@ protected:
     QString xml_path_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_ABSTRACTOOXMLFILE_H

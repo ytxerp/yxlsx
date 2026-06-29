@@ -27,7 +27,7 @@
 
 #include "abstractooxmlfile.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Style final : public AbstractOOXmlFile {
 public:
@@ -37,6 +37,6 @@ public:
     bool ParseXml(QIODevice* device) override;
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_STYLE_H

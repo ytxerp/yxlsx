@@ -27,7 +27,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 // ECMA-376 Part1 18.3.1.81
 // https://ecma-international.org/publications-and-standards/standards/ecma-376/
@@ -42,6 +42,6 @@ struct SheetFormatProps {
     double default_row_height {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_SHEETFORMATPROPS_H

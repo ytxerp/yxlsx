@@ -27,7 +27,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Utility {
 public:
@@ -53,5 +53,5 @@ private:
     static QString ComposeColumn(int column);
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 #endif // YXLSX_UTILITY_H

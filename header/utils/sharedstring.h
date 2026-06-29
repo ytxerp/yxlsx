@@ -35,7 +35,7 @@
 #include "abstractooxmlfile.h"
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class SharedString final : public AbstractOOXmlFile {
 public:
@@ -78,6 +78,6 @@ private:
     QHash<QString, int> string_count_hash_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_SHAREDSTRING_H

@@ -28,7 +28,7 @@
 
 #include "relationshipmgr.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 AbstractOOXmlFile::AbstractOOXmlFile(OperationMode mode)
     : relationship_ { new RelationshipMgr }
@@ -57,4 +57,4 @@ bool AbstractOOXmlFile::ParseByteArray(const QByteArray& data)
     return ParseXml(&buffer);
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

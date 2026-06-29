@@ -29,7 +29,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 DocPropsApp::DocPropsApp(OperationMode mode)
     : AbstractOOXmlFile { mode }
@@ -169,4 +169,4 @@ bool DocPropsApp::ParseXml(QIODevice* device)
     return true;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

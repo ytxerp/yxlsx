@@ -28,7 +28,7 @@
 #include "namespace.h"
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Dimension final {
 public:
@@ -84,8 +84,8 @@ private:
     int right_column_ { kInvalidValue };
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
-Q_DECLARE_TYPEINFO(YXlsx::Dimension, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(yxlsx::Dimension, Q_MOVABLE_TYPE);
 
 #endif // YXLSX_DIMENSION_H

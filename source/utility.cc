@@ -27,7 +27,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 QStringList Utility::SplitPath(const QString& path)
 {
@@ -208,4 +208,4 @@ QString Utility::ComposeColumn(int column)
     return col_str;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

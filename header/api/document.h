@@ -28,7 +28,7 @@
 #include "contenttype.h"
 #include "workbook.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Document final : public QObject {
 public:
@@ -60,6 +60,6 @@ private:
     QSharedPointer<ContentType> content_type_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_DOCUMENT_H

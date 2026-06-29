@@ -36,7 +36,7 @@
 #include "zipreader.h"
 #include "zipwriter.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 void Document::Init()
 {
@@ -327,4 +327,4 @@ bool Document::Save(const QString& xlsx_name) const
     return ComposeXlsx(&file);
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

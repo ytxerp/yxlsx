@@ -28,7 +28,7 @@
 
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 /*!
  * Calculates the "spans" attribute for the <row> tag in XLSX. This is an optimization for faster comparison
@@ -543,4 +543,4 @@ bool Worksheet::ParseXml(QIODevice* device)
     return true;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

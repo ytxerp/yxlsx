@@ -24,7 +24,7 @@
 
 #include "zipreader.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 ZipReader::ZipReader(const QString& file_path)
     : reader_ { new QZipReader(file_path) }
@@ -49,4 +49,4 @@ void ZipReader::Init()
     }
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

@@ -29,7 +29,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 // ECMA 376, 18.18.11. ST_CellType (Cell Type)
 // https://ecma-international.org/publications-and-standards/standards/ecma-376/
@@ -77,8 +77,8 @@ struct Cell final {
     QVariant value {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
-Q_DECLARE_TYPEINFO(YXlsx::Cell, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(yxlsx::Cell, Q_MOVABLE_TYPE);
 
 #endif // YXLSX_CELL_H

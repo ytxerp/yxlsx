@@ -29,7 +29,7 @@
 
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 Dimension::Dimension(int top_row, int left_column, int bottom_row, int right_column)
     : top_row_ { top_row }
@@ -91,4 +91,4 @@ QString Dimension::ComposeDimension(bool row_abs, bool col_abs) const
     return QStringLiteral("%1:%2").arg(start, end);
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

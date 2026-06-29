@@ -28,7 +28,7 @@
 
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 SharedString::SharedString(OperationMode mode)
     : AbstractOOXmlFile { mode }
@@ -182,4 +182,4 @@ bool SharedString::ParseXml(QIODevice* device)
     return true;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

@@ -27,7 +27,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 struct DefinedName {
     DefinedName() = default;
@@ -46,5 +46,5 @@ struct DefinedName {
     int sheet_id { kInvalidValue };
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 #endif // YXLSX_DEFINEDNAME_H

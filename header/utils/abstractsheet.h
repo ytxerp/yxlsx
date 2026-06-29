@@ -27,7 +27,7 @@
 
 #include "abstractooxmlfile.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 enum class SheetType { kWorkSheet };
 
@@ -53,5 +53,5 @@ protected:
     SheetType sheet_type_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 #endif // YXLSX_ABSTRACTSHEET_H

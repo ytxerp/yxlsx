@@ -30,7 +30,7 @@
 #include "abstractooxmlfile.h"
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class DocPropsCore final : public AbstractOOXmlFile {
 public:
@@ -48,6 +48,6 @@ private:
     static const QHash<QString, QString> kElementNamespaceHash;
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_DOCPROPSCORE_H

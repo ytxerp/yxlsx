@@ -32,7 +32,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class ZipWriter {
     Q_DISABLE_COPY(ZipWriter)
@@ -52,6 +52,6 @@ private:
     QScopedPointer<QZipWriter> writer_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_ZIPWRITER_H

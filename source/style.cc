@@ -27,7 +27,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 Style::Style(OperationMode mode)
     : AbstractOOXmlFile { mode }
@@ -154,4 +154,4 @@ bool Style::ParseXml(QIODevice* device)
     return true;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

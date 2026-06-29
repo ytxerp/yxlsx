@@ -32,7 +32,7 @@
 
 #include "abstractooxmlfile.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class ContentType final : public AbstractOOXmlFile {
 public:
@@ -66,5 +66,5 @@ private:
     const QString document_prefix_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 #endif // YXLSX_CONTENTTYPE_H

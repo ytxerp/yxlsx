@@ -24,7 +24,7 @@
 
 #include "zipwriter.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 ZipWriter::ZipWriter(const QString& file_path)
     : writer_ { new QZipWriter(file_path, QIODevice::WriteOnly) }
@@ -38,4 +38,4 @@ ZipWriter::ZipWriter(QIODevice* device)
     writer_->setCompressionPolicy(QZipWriter::AutoCompress);
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

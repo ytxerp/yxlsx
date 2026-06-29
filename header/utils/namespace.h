@@ -27,8 +27,8 @@
 
 #include <QString>
 
-#define QT_BEGIN_NAMESPACE_YXLSX namespace YXlsx {
-#define QT_END_NAMESPACE_YXLSX }
+#define YXLSX_BEGIN_NAMESPACE namespace yxlsx {
+#define YXLSX_END_NAMESPACE }
 
 inline constexpr int kInvalidValue = -1;
 inline constexpr int kExcelRowMax = 1048576;

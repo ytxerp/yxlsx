@@ -27,7 +27,7 @@
 #include <QBuffer>
 #include <QDebug>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 inline const QString kOxDocument { QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships") };
 inline const QString kMsOffice { QStringLiteral("http://schemas.microsoft.com/office/2006/relationships") };
@@ -177,4 +177,4 @@ bool RelationshipMgr::ReadByteArray(const QByteArray& data)
 
 Relationship RelationshipMgr::GetRelationshipByID(const QString& id) const { return relationship_hash_.value(id, Relationship()); }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

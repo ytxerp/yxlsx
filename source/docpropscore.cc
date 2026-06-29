@@ -29,7 +29,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 inline const QLatin1String kCoreProperties("http://schemas.openxmlformats.org/package/2006/metadata/core-properties");
 inline const QLatin1String kPLElements("http://purl.org/dc/elements/1.1/");
@@ -120,4 +120,4 @@ bool DocPropsCore::ParseXml(QIODevice* device)
     return true;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

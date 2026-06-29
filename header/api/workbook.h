@@ -36,7 +36,7 @@
 #include "style.h"
 #include "worksheet.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Workbook final : public AbstractOOXmlFile {
     Q_DISABLE_COPY_MOVE(Workbook)
@@ -112,6 +112,6 @@ private:
     int last_sheet_id_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_WORKBOOK_H

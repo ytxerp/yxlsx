@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     // [1]  Writing excel file(*.xlsx)
     qDebug() << "------------------[1]------------------------";
 
-    YXlsx::Document test1 {};
+    yxlsx::Document test1 {};
     auto book1 { test1.GetWorkbook() };
 
     book1->GetCurrentWorksheet()->Write(1, 1, "Hello Qt!");
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     // [2] Reading excel file(*.xlsx)
     qDebug() << "------------------[2]------------------------";
 
-    YXlsx::Document test2("Test1.xlsx");
+    yxlsx::Document test2("Test1.xlsx");
     auto book2 { test2.GetWorkbook() };
 
     if (test2.IsLoadXlsx()) {
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     // [3]
     qDebug() << "------------------[3]------------------------";
 
-    YXlsx::Document test3("Test2.xlsx");
+    yxlsx::Document test3("Test2.xlsx");
     auto book3 { test3.GetWorkbook() };
     QList<int> list { 1, 2, 3 };
     book3->GetCurrentWorksheet()->WriteColumn(1, 1, list);
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     // [4]
     qDebug() << "------------------[4]------------------------";
 
-    YXlsx::Document test4("Test3.xlsx");
+    yxlsx::Document test4("Test3.xlsx");
     auto workbook4 { test4.GetWorkbook() };
 
     // current sheet is Sheet1(default sheet)
@@ -95,10 +95,10 @@ int main(int argc, char* argv[])
     workbook4->GetCurrentWorksheet()->Write(3, 3, "This will be deleted...");
 
     workbook4->AppendSheet("HiddenSheet");
-    workbook4->GetCurrentWorksheet()->Write(YXlsx::Coordinate("A1"), "This sheet is hidden.");
+    workbook4->GetCurrentWorksheet()->Write(yxlsx::Coordinate("A1"), "This sheet is hidden.");
 
     workbook4->AppendSheet("VeryHiddenSheet");
-    workbook4->GetCurrentWorksheet()->Write(YXlsx::Coordinate("A1"), "This sheet is very hidden.");
+    workbook4->GetCurrentWorksheet()->Write(yxlsx::Coordinate("A1"), "This sheet is very hidden.");
 
     workbook4->RenameSheet("HiddenSheet", "Hello World");
 

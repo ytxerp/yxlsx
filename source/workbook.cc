@@ -28,7 +28,7 @@
 
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 Workbook::Workbook(OperationMode mode)
     : shared_string_ { QSharedPointer<SharedString>::create(mode) }
@@ -489,4 +489,4 @@ QString Workbook::ResolveFullPath(const QString& target, const QString& base_pat
     }
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

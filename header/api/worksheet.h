@@ -35,7 +35,7 @@
 #include "sharedstring.h"
 #include "sheetformatprops.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 template <typename T>
 concept Container = std::ranges::range<T> && requires(T t) {
@@ -156,6 +156,6 @@ private:
     QMap<std::pair<int, int>, QSharedPointer<Cell>> matrix_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_WORKSHEET_H

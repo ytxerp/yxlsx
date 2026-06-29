@@ -32,7 +32,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 struct Relationship {
     QString id {};
@@ -77,6 +77,6 @@ private:
     QHash<QString, Relationship> relationship_hash_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_RELATIONSHIPMGR_H

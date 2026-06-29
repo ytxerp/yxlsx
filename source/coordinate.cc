@@ -28,7 +28,7 @@
 
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 Coordinate::Coordinate(int row, int column)
     : row_ { row }
@@ -61,4 +61,4 @@ void Coordinate::Init(const QString& coordinate)
     column_ = coord.second;
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

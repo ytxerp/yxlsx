@@ -31,7 +31,7 @@
 
 #include "namespace.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class ZipReader {
     Q_DISABLE_COPY(ZipReader)
@@ -52,6 +52,6 @@ private:
     QStringList file_path_ {};
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
 #endif // YXLSX_ZIPREADER_H

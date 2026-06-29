@@ -27,7 +27,7 @@
 #include <QBuffer>
 #include <QDebug>
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 ContentType::ContentType(OperationMode mode)
     : AbstractOOXmlFile { mode }
@@ -126,4 +126,4 @@ void ContentType::ParseElement(const QXmlStreamAttributes& attrs, QHash<QString,
     }
 }
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE

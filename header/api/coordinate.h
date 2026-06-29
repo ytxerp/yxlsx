@@ -28,7 +28,7 @@
 #include "namespace.h"
 #include "utility.h"
 
-QT_BEGIN_NAMESPACE_YXLSX
+YXLSX_BEGIN_NAMESPACE
 
 class Coordinate final {
 public:
@@ -56,8 +56,8 @@ private:
     int column_ { kInvalidValue };
 };
 
-QT_END_NAMESPACE_YXLSX
+YXLSX_END_NAMESPACE
 
-Q_DECLARE_TYPEINFO(YXlsx::Coordinate, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(yxlsx::Coordinate, Q_MOVABLE_TYPE);
 
 #endif // YXLSX_COORDINATE_H
