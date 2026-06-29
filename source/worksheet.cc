@@ -430,19 +430,14 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader)
 
     // Read cell attributes
     QXmlStreamAttributes attributes { reader.attributes() };
-    QString cell_reference { attributes.value(QLatin1String("r")).toString() };
 
-    // Determine cell position
-    Coordinate coord {};
+    const QString cell_reference { attributes.value(QLatin1String("r")).toString() };
+    const Coordinate coord { cell_reference };
 
-    if (!cell_reference.isEmpty()) {
-        coord = Coordinate { cell_reference };
-    } else {
-        qWarning() << "Cell reference ('r' attribute) is missing. "
-                   << "Using default coordinate A1.";
-
-        coord.SetRow(1);
-        coord.SetColumn(1);
+    if (!Coordinate::IsValid(coord)) {
+        qWarning() << "Invalid cell reference:" << cell_reference << "at line" << reader.lineNumber() << "column" << reader.columnNumber();
+        reader.skipCurrentElement();
+        return;
     }
 
     // Determine cell type
