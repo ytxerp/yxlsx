@@ -33,43 +33,21 @@ YXLSX_BEGIN_NAMESPACE
 
 // ECMA 376, 18.18.11. ST_CellType (Cell Type)
 // https://ecma-international.org/publications-and-standards/standards/ecma-376/
-enum class CellType { kEmpty, kBoolean, kDateTime, kNumber, kSharedString };
+enum class CellType { kEmpty, kBoolean, kDateTime, kNumber, kSharedString, kInlineString, kError };
+
+enum class StringType { kSharedString, kInlineString };
 
 // Cell is a lightweight value container.
 // - No formulas
 // - No formatting
-// - Strings are always stored as shared strings
-// - Date is a semantic type, not a number format
+// - Strings may be stored as shared strings or inline strings.
+// - DateTime represents ISO 8601 date cells (t="d").
 struct Cell final {
     Cell() = default;
 
     explicit Cell(const QVariant& value, CellType type)
         : type(type)
         , value(value)
-    {
-    }
-
-    explicit Cell(bool v)
-        : type(CellType::kBoolean)
-        , value(v)
-    {
-    }
-
-    explicit Cell(double v)
-        : type(CellType::kNumber)
-        , value(v)
-    {
-    }
-
-    explicit Cell(const QString& v)
-        : type(CellType::kSharedString)
-        , value(v)
-    {
-    }
-
-    explicit Cell(const QDateTime& v)
-        : type(CellType::kDateTime)
-        , value(v)
     {
     }
 

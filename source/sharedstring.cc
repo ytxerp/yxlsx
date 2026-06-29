@@ -54,7 +54,7 @@ void SharedString::SetSharedString(const QString& string)
 void SharedString::IncrementReference(int index)
 {
     if (index < 0 || index >= string_list_.size()) {
-        qDebug("SharedStrings: invalid index");
+        qDebug() << Q_FUNC_INFO << "SharedStrings: invalid index";
         return;
     }
 
@@ -63,9 +63,12 @@ void SharedString::IncrementReference(int index)
 
 QString SharedString::GetSharedString(int index) const
 {
-    if (index < string_list_.count() && index >= 0)
-        return string_list_[index];
-    return {};
+    if (index < 0 || index >= string_list_.size()) {
+        qDebug() << Q_FUNC_INFO << "SharedStrings: invalid index";
+        return {};
+    }
+
+    return string_list_[index];
 }
 
 void SharedString::ComposeXml(QIODevice* device) const

@@ -32,6 +32,7 @@
 #include "cell.h"
 #include "coordinate.h"
 #include "dimension.h"
+#include "namespace.h"
 #include "sharedstring.h"
 #include "sheetformatprops.h"
 
@@ -52,10 +53,10 @@ public:
     QVariant Read(const Coordinate& coordinate) const;
     QVariant Read(int row, int column) const;
 
-    bool Write(const Coordinate& coordinate, const QVariant& data);
-    bool Write(int row, int column, const QVariant& data);
+    bool Write(const Coordinate& coordinate, const QVariant& data, StringType string_type = StringType::kSharedString);
+    bool Write(int row, int column, const QVariant& data, StringType string_type = StringType::kSharedString);
 
-    template <Container T> inline bool WriteColumn(int row, int column, const T& container)
+    template <Container T> inline bool WriteColumn(int row, int column, const T& container, StringType string_type = StringType::kSharedString)
     {
         if (container.size() == 0 || !Utility::IsValidRowColumn(row, column)) {
             qWarning() << "Data is empty for column write.";
@@ -72,7 +73,7 @@ public:
         for (const auto& value : container) {
             QVariant qvalue(value);
 
-            const CellType cell_type { DetermineCellType(qvalue) };
+            const CellType cell_type { DetermineCellType(qvalue, string_type) };
 
             if (cell_type != CellType::kEmpty) {
                 auto cell { QSharedPointer<Cell>::create(qvalue, cell_type) };
@@ -90,7 +91,7 @@ public:
         return true;
     }
 
-    template <Container T> inline bool WriteRow(int row, int column, const T& container)
+    template <Container T> inline bool WriteRow(int row, int column, const T& container, StringType string_type = StringType::kSharedString)
     {
         if (container.size() == 0 || !Utility::IsValidRowColumn(row, column)) {
             qWarning() << "Data is empty for row write.";
@@ -107,7 +108,7 @@ public:
         for (const auto& value : container) {
             QVariant qvalue(value);
 
-            const CellType cell_type { DetermineCellType(qvalue) };
+            const CellType cell_type { DetermineCellType(qvalue, string_type) };
 
             if (cell_type != CellType::kEmpty) {
                 auto cell { QSharedPointer<Cell>::create(qvalue, cell_type) };
@@ -128,8 +129,8 @@ public:
 private:
     void ComposeXml(QIODevice* device) const override;
     bool ParseXml(QIODevice* device) override;
-    void ProcessCell(QXmlStreamReader& reader, int row, int& column);
-    QVariant ParseCellValue(const QString& value, CellType cell_type, int row, int column);
+    void ProcessCell(QXmlStreamReader& reader);
+    QVariant ParseCellValue(const QString& value, CellType cell_type);
 
     bool UpdateDimension(int row, int col);
     QString ComposeDimension() const;
@@ -139,6 +140,7 @@ private:
     void ComposeCell(QXmlStreamWriter& writer, int row, int col, const QSharedPointer<Cell>& cell) const;
 
     void ParseSheet(QXmlStreamReader& reader);
+    void ParseRow(QXmlStreamReader& reader);
 
     inline void WriteMatrix(int row, int column, const QSharedPointer<Cell>& cell) { matrix_.insert({ row, column }, cell); }
     inline QSharedPointer<Cell> ReadMatrix(int row, int column) const { return matrix_.value({ row, column }); }
@@ -146,7 +148,7 @@ private:
     bool WriteBlank(int row, int column);
 
     inline bool Contains(int row, int column) const { return matrix_.contains({ row, column }); }
-    CellType DetermineCellType(const QVariant& value) const;
+    CellType DetermineCellType(const QVariant& value, StringType string_type = StringType::kSharedString) const;
 
 private:
     Dimension dimension_ {};

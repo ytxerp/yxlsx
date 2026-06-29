@@ -13,11 +13,12 @@ int main(int argc, char* argv[])
     yxlsx::Document test1 {};
     auto book1 { test1.GetWorkbook() };
 
-    book1->GetCurrentWorksheet()->Write(1, 1, "Hello Qt!");
+    book1->GetCurrentWorksheet()->Write(1, 1, "Hello Qt! Inline", yxlsx::StringType::kInlineString);
+    book1->GetCurrentWorksheet()->Write(3, 1, "Hello Qt! Shared");
     book1->GetCurrentWorksheet()->Write(1, 2, 2);
     book1->GetCurrentWorksheet()->Write(1, 3, true);
     book1->GetCurrentWorksheet()->Write(1, 4, QDateTime::currentDateTime());
-    book1->GetCurrentWorksheet()->Write("b1", 2);
+    book1->GetCurrentWorksheet()->Write("b2", 2);
 
     if (!test1.Save("Test1.xlsx")) {
         qDebug() << "Failed to write xlsx file";
@@ -32,6 +33,12 @@ int main(int argc, char* argv[])
     if (test2.IsLoadXlsx()) {
         auto value { book2->GetCurrentWorksheet()->Read(1, 1) };
         qDebug() << "Cell(1,1) is " << value;
+
+        value = book2->GetCurrentWorksheet()->Read(3, 1);
+        qDebug() << "Cell(3,1) is " << value;
+
+        value = book2->GetCurrentWorksheet()->Read(2, 2);
+        qDebug() << "Cell(2,2) is " << value;
 
         value = book2->GetCurrentWorksheet()->Read(1, 2);
         qDebug() << "Cell(1,2) is " << value;
@@ -48,6 +55,8 @@ int main(int argc, char* argv[])
     } else {
         qDebug() << "Failed to load xlsx file.";
     }
+
+#if 1
 
     // [3]
     qDebug() << "------------------[3]------------------------";
@@ -84,7 +93,7 @@ int main(int argc, char* argv[])
     // current sheet is Sheet1(default sheet)
     for (int i = 1; i < 20; ++i) {
         for (int j = 1; j < 15; ++j) {
-            workbook4->GetCurrentWorksheet()->Write(i, j, QString("R %1 C %2").arg(i).arg(j));
+            workbook4->GetCurrentWorksheet()->Write(i, j, QString("R %1 C %2").arg(i).arg(j), yxlsx::StringType::kInlineString);
         }
     }
 
@@ -114,4 +123,6 @@ int main(int argc, char* argv[])
     qDebug() << "------------------[5]------------------------";
 
     return 0;
+
+#endif
 }

@@ -117,7 +117,7 @@ Worksheet::~Worksheet() { }
  *
  * Returns true if the write operation is successful.
  */
-bool Worksheet::Write(int row, int column, const QVariant& data)
+bool Worksheet::Write(int row, int column, const QVariant& data, StringType string_type)
 {
     if (!Utility::IsValidRowColumn(row, column))
         return false;
@@ -128,7 +128,7 @@ bool Worksheet::Write(int row, int column, const QVariant& data)
     if (!UpdateDimension(row, column))
         return false;
 
-    const CellType cell_type { DetermineCellType(data) };
+    const CellType cell_type { DetermineCellType(data, string_type) };
 
     auto cell { QSharedPointer<Cell>::create(data, cell_type) };
 
@@ -140,7 +140,7 @@ bool Worksheet::Write(int row, int column, const QVariant& data)
     return true;
 }
 
-CellType Worksheet::DetermineCellType(const QVariant& value) const
+CellType Worksheet::DetermineCellType(const QVariant& value, StringType string_type) const
 {
     if (!value.isValid())
         return CellType::kEmpty;
@@ -161,7 +161,7 @@ CellType Worksheet::DetermineCellType(const QVariant& value) const
         return CellType::kDateTime;
 
     case QMetaType::QString:
-        return CellType::kSharedString;
+        return string_type == StringType::kSharedString ? CellType::kSharedString : CellType::kInlineString;
 
     default:
         qWarning() << "Unsupported QVariant type:" << value.typeName();
@@ -175,14 +175,14 @@ CellType Worksheet::DetermineCellType(const QVariant& value) const
  * Both row and column in the \a coordinate are 1-indexed.
  * Returns true if the operation is successful.
  */
-bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data)
+bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data, StringType string_type)
 {
     // Ensure the coordinate is valid before proceeding
     if (!Coordinate::IsValid(coordinate))
         return false;
 
     // Delegate to the row-column-based Write method
-    return Write(coordinate.Row(), coordinate.Column(), data);
+    return Write(coordinate.Row(), coordinate.Column(), data, string_type);
 }
 
 /*!
@@ -353,7 +353,7 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
     }
     case CellType::kNumber: { // 'n'
         writer.writeAttribute(QLatin1String("t"), QLatin1String("n"));
-        writer.writeTextElement(QLatin1String("v"), QString::number(cell->value.toDouble(), 'f', 15));
+        writer.writeTextElement(QLatin1String("v"), QString::number(cell->value.toDouble(), 'g', 15));
         break;
     }
     case CellType::kBoolean: { // 'b'
@@ -364,6 +364,26 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
     case CellType::kDateTime: {
         writer.writeAttribute(QLatin1String("t"), QLatin1String("d"));
         writer.writeTextElement(QLatin1String("v"), cell->value.toDateTime().toString(Qt::ISODateWithMs));
+        break;
+    }
+    case CellType::kInlineString: { // 'inlineStr'
+        writer.writeAttribute(QLatin1String("t"), QLatin1String("inlineStr"));
+
+        const QString text { cell->value.toString() };
+
+        writer.writeStartElement(QLatin1String("is"));
+        writer.writeStartElement(QLatin1String("t"));
+
+        const bool preserve_space { !text.isEmpty() && (text.front().isSpace() || text.back().isSpace() || text.contains(QLatin1String("  "))) };
+        if (preserve_space) {
+            writer.writeAttribute(QLatin1String("xml:space"), QLatin1String("preserve"));
+        }
+
+        writer.writeCharacters(text);
+
+        writer.writeEndElement(); // </t>
+        writer.writeEndElement(); // </is>
+
         break;
     }
     default:
@@ -378,47 +398,33 @@ void Worksheet::ParseSheet(QXmlStreamReader& reader)
 {
     Q_ASSERT(reader.name() == QStringLiteral("sheetData"));
 
-    int row { 0 };
-    int column { 0 };
-
-    // Iterate over all child elements of <sheetData>
     while (reader.readNextStartElement()) {
-        const QString name { reader.name().toString() };
-
-        if (name == QStringLiteral("row")) {
-            // Parse row attributes
-            const QXmlStreamAttributes attributes { reader.attributes() };
-
-            if (attributes.hasAttribute(QLatin1String("r"))) {
-                row = attributes.value(QLatin1String("r")).toInt();
-            } else {
-                ++row; // Auto-increment if no "r" attribute
-            }
-
-            column = 0; // Reset column counter for new row
-
-            // Skip to the end of the <row> element to process children
-            // Children will be handled in readNextStartElement
-            continue;
+        if (reader.name() == QStringLiteral("row")) {
+            ParseRow(reader);
+        } else {
+            reader.skipCurrentElement();
         }
-
-        if (name == QStringLiteral("c")) {
-            // Process cell and update column counter
-            ProcessCell(reader, row, column);
-            continue;
-        }
-
-        // Skip unknown elements
-        reader.skipCurrentElement();
     }
 
-    // Check for XML errors
     if (reader.hasError()) {
-        qWarning() << "XML Parsing Error in <sheetData>:" << reader.errorString();
+        qWarning() << "ParseSheet error:" << reader.errorString();
     }
 }
 
-void Worksheet::ProcessCell(QXmlStreamReader& reader, int row, int& column)
+void Worksheet::ParseRow(QXmlStreamReader& reader)
+{
+    Q_ASSERT(reader.name() == QStringLiteral("row"));
+
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QStringLiteral("c")) {
+            ProcessCell(reader);
+        } else {
+            reader.skipCurrentElement();
+        }
+    }
+}
+
+void Worksheet::ProcessCell(QXmlStreamReader& reader)
 {
     Q_ASSERT(reader.name() == QStringLiteral("c"));
 
@@ -428,25 +434,38 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader, int row, int& column)
 
     // Determine cell position
     Coordinate coord {};
-    if (cell_reference.isEmpty()) {
-        coord.SetRow(row);
-        coord.SetColumn(++column);
-    } else {
+
+    if (!cell_reference.isEmpty()) {
         coord = Coordinate { cell_reference };
-        column = coord.Column();
+    } else {
+        qWarning() << "Cell reference ('r' attribute) is missing. "
+                   << "Using default coordinate A1.";
+
+        coord.SetRow(1);
+        coord.SetColumn(1);
     }
 
     // Determine cell type
     CellType cell_type { CellType::kNumber }; // default type is Number
+
     if (attributes.hasAttribute(QLatin1String("t"))) {
         const QString type { attributes.value(QLatin1String("t")).toString() };
-        if (type == QLatin1String("s")) {
+
+        if (type == QLatin1String("s"))
             cell_type = CellType::kSharedString;
-        } else if (type == QLatin1String("b")) {
+        else if (type == QLatin1String("inlineStr"))
+            cell_type = CellType::kInlineString;
+        else if (type == QLatin1String("str"))
+            cell_type = CellType::kInlineString; // Formula string result, treated as plain string.
+        else if (type == QLatin1String("b"))
             cell_type = CellType::kBoolean;
-        } else if (type == QLatin1String("d")) {
+        else if (type == QLatin1String("d"))
             cell_type = CellType::kDateTime;
-        } // otherwise keep default Number
+        else if (type == QLatin1String("e"))
+            cell_type = CellType::kError;
+        else if (type == QLatin1String("n"))
+            cell_type = CellType::kNumber;
+        // otherwise keep default Number
     }
 
     // Create cell
@@ -456,7 +475,18 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader, int row, int& column)
     while (reader.readNextStartElement()) {
         if (reader.name() == QStringLiteral("v")) {
             const QString value { reader.readElementText() };
-            cell->value = ParseCellValue(value, cell_type, row, column);
+            cell->value = ParseCellValue(value, cell_type);
+        } else if (reader.name() == QStringLiteral("is")) {
+            // inline string structure
+            while (reader.readNextStartElement()) {
+                if (reader.name() == QStringLiteral("t")) {
+                    const QString text = reader.readElementText();
+                    cell->value = text;
+                } else {
+                    reader.skipCurrentElement();
+                }
+            }
+
         } else {
             // Skip unknown sub-elements
             reader.skipCurrentElement();
@@ -464,26 +494,27 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader, int row, int& column)
     }
 
     if (reader.hasError()) {
-        qWarning() << "XML Parsing Error in <c> element at row" << row << "column" << column << ":" << reader.errorString();
+        qWarning() << "XML Parsing Error in <c> at"
+                   << "row:" << coord.Row() << "col:" << coord.Column() << reader.errorString();
     }
 
     // Write cell to the matrix
     WriteMatrix(coord.Row(), coord.Column(), cell);
 }
 
-QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type, int row, int column)
+QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type)
 {
     switch (cell_type) {
     case CellType::kSharedString: {
-        int index = value.toInt();
-        if (shared_string_) {
-            shared_string_->IncrementReference(index);
-            return shared_string_->GetSharedString(index);
-        } else {
-            qWarning() << "SharedString object is null, returning raw value at"
-                       << "row:" << row << "column:" << column;
-            return value;
+        bool ok = false;
+        int index = value.toInt(&ok);
+
+        if (!ok || !shared_string_) {
+            return QVariant();
         }
+
+        shared_string_->IncrementReference(index);
+        return shared_string_->GetSharedString(index);
     }
     case CellType::kBoolean: {
         const QString lower = value.toLower();
@@ -492,7 +523,7 @@ QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type, int
     case CellType::kDateTime: {
         QDateTime dt = QDateTime::fromString(value, Qt::ISODate);
         if (!dt.isValid()) {
-            qWarning() << "Invalid date value:" << value << "at row:" << row << "column:" << column;
+            qWarning() << "Invalid date value.";
         }
         return QVariant::fromValue(dt);
     }
@@ -500,12 +531,14 @@ QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type, int
         bool ok = false;
         double d = value.toDouble(&ok);
         if (!ok) {
-            qWarning() << "Invalid numeric value:" << value << "at row:" << row << "column:" << column;
+            qWarning() << "Invalid numeric value.";
         }
         return QVariant(d);
     }
+    case CellType::kInlineString:
+        return value;
     default:
-        qWarning() << "Unsupported cell type, returning raw value:" << value << "at row:" << row << "column:" << column;
+        qWarning() << "Unsupported cell type, returning raw value.";
         return value;
     }
 }
