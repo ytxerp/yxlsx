@@ -39,7 +39,7 @@ public:
     static QString GenerateSheetName(const QStringList& sheet_names, const QString& name_proposal, int& last_sheet_index);
     static QString UnescapeSheetName(const QString& sheetName);
 
-    static bool IsSpaceReserveNeeded(const QString& string);
+    static bool IsSpacePreserveNeeded(const QString& string);
 
     static constexpr bool IsValidRowColumn(int row, int column) { return row >= 1 && row <= kExcelRowMax && column >= 1 && column <= kExcelColumnMax; }
     static bool IsValidCellRange(int top_row, int left_column, int bottom_row, int right_column)

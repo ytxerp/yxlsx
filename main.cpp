@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
     yxlsx::Document test1 {};
     auto book1 { test1.GetWorkbook() };
 
-    book1->GetCurrentWorksheet()->Write(1, 1, "Hello Qt! Inline", yxlsx::StringType::kInlineString);
-    book1->GetCurrentWorksheet()->Write(3, 1, "Hello Qt! Shared");
+    book1->GetCurrentWorksheet()->Write(1, 1, "  Hello Qt! Inline", yxlsx::StringType::kInlineString);
+    book1->GetCurrentWorksheet()->Write(3, 1, "Hello Qt! Shared  ");
     book1->GetCurrentWorksheet()->Write(1, 2, 2);
     book1->GetCurrentWorksheet()->Write(1, 3, true);
     book1->GetCurrentWorksheet()->Write(1, 4, QDateTime::currentDateTime());

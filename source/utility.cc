@@ -130,14 +130,14 @@ QString Utility::UnescapeSheetName(const QString& sheetName)
 /*
  * Check whether the string `s` starts or ends with a space or whitespace character.
  */
-bool Utility::IsSpaceReserveNeeded(const QString& s)
+bool Utility::IsSpacePreserveNeeded(const QString& s)
 {
     // Early exit if the string is empty
     if (s.isEmpty())
         return false;
 
     // Check if the first or last character is a whitespace character
-    return s.front().isSpace() || s.back().isSpace();
+    return s.front().isSpace() || s.back().isSpace() || s.contains(QStringLiteral("  "));
 }
 
 std::pair<int, int> Utility::ParseCoordinate(const QString& coordinate)

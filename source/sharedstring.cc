@@ -100,7 +100,7 @@ void SharedString::ComposeXml(QIODevice* device) const
         writer.writeStartElement(QLatin1String("t"));
 
         // Add xml:space attribute if needed
-        if (Utility::IsSpaceReserveNeeded(string)) {
+        if (Utility::IsSpacePreserveNeeded(string)) {
             writer.writeAttribute(QLatin1String("http://www.w3.org/XML/1998/namespace"), QLatin1String("space"), QLatin1String("preserve"));
         }
         writer.writeCharacters(string);

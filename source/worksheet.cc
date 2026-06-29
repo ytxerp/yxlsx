@@ -374,9 +374,8 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
         writer.writeStartElement(QLatin1String("is"));
         writer.writeStartElement(QLatin1String("t"));
 
-        const bool preserve_space { !text.isEmpty() && (text.front().isSpace() || text.back().isSpace() || text.contains(QLatin1String("  "))) };
-        if (preserve_space) {
-            writer.writeAttribute(QLatin1String("xml:space"), QLatin1String("preserve"));
+        if (Utility::IsSpacePreserveNeeded(text)) {
+            writer.writeAttribute(QStringLiteral("http://www.w3.org/XML/1998/namespace"), QStringLiteral("space"), QStringLiteral("preserve"));
         }
 
         writer.writeCharacters(text);
