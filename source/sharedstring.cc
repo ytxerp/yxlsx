@@ -35,63 +35,30 @@ SharedString::SharedString(OperationMode mode)
 {
 }
 
-int SharedString::SetSharedString(const QString& string, int row, int column)
+void SharedString::SetSharedString(const QString& string)
 {
-    // If the string is not in the list, append it
-    if (!string_list_.contains(string)) {
+    auto it = string_index_hash_.find(string);
+
+    // If string does not exist, create new entry
+    if (it == string_index_hash_.end()) {
         int index = string_list_.size();
+
         string_list_.append(string);
-        string_index_hash_.insert(string, index);
+        it = string_index_hash_.insert(string, index);
     }
 
-    // Insert or update the cell coordinates for the shared string
-    string_coordinate_hash_[string].insert({ row, column });
-
-    return string_index_hash_.value(string);
+    // Optional usage tracking
+    string_count_hash_[string] += 1;
 }
 
-void SharedString::IncrementReference(int index, int row, int column)
+void SharedString::IncrementReference(int index)
 {
     if (index < 0 || index >= string_list_.size()) {
         qDebug("SharedStrings: invalid index");
         return;
     }
 
-    string_coordinate_hash_[string_list_.at(index)].insert({ row, column });
-}
-
-QSet<std::pair<int, int>> SharedString::RemoveSharedString(const QString& string, int row, int column)
-{
-    const int index { string_index_hash_.value(string, -1) };
-    if (index == -1) {
-        qDebug() << "String not found:" << string;
-        return {};
-    }
-
-    if (!string_coordinate_hash_[string].remove({ row, column })) {
-        qDebug() << "Row not found:" << row;
-        return {};
-    }
-
-    QSet<std::pair<int, int>> affected_coord {};
-
-    if (string_coordinate_hash_.value(string).isEmpty()) {
-        for (int i = index + 1; i != string_list_.size(); ++i) {
-            const QString& target_string { string_list_.at(i) };
-            const auto& target_set { string_coordinate_hash_.value(target_string) };
-
-            string_index_hash_[target_string] -= 1;
-
-            for (const auto& pair : target_set)
-                affected_coord += pair;
-        }
-
-        string_coordinate_hash_.remove(string);
-        string_index_hash_.remove(string);
-        string_list_.removeAt(index);
-    }
-
-    return affected_coord;
+    string_count_hash_[string_list_.at(index)] += 1;
 }
 
 QString SharedString::GetSharedString(int index) const
@@ -113,8 +80,10 @@ void SharedString::ComposeXml(QIODevice* device) const
     writer.writeStartDocument(QLatin1String("1.0"), true);
 
     // Calculate the total reference count
-    const int total_count = std::accumulate(
-        string_coordinate_hash_.cbegin(), string_coordinate_hash_.cend(), 0, [](int sum, const QSet<QPair<int, int>>& set) { return sum + set.size(); });
+    int total_count { 0 };
+    for (auto it = string_count_hash_.cbegin(); it != string_count_hash_.cend(); ++it) {
+        total_count += it.value();
+    }
 
     // Write root element <sst>
     writer.writeStartElement(QLatin1String("sst"));
@@ -146,26 +115,27 @@ void SharedString::ParseSharedString(QXmlStreamReader& reader)
 
     QString string {};
 
-    // readNextStartElement() automatically returns false and exits safely
-    // when it encounters the corresponding closing tag </si>
     while (reader.readNextStartElement()) {
         if (reader.name() == QStringLiteral("t")) {
-            string += reader.readElementText();
-            // readElementText() consumes the text and automatically advances the reader past </t>
+            string += reader.readElementText(QXmlStreamReader::IncludeChildElements);
         } else if (reader.name() == QStringLiteral("r")) {
-            // Rich text run container. Do nothing and let the loop continue;
-            // the next readNextStartElement() call will dive inside <r> to find the nested <t>
+            // rich text run → drill down automatically
+            while (reader.readNextStartElement()) {
+                if (reader.name() == QStringLiteral("t")) {
+                    string += reader.readElementText();
+                } else {
+                    reader.skipCurrentElement();
+                }
+            }
         } else {
-            // Skip any other unconcerned elements safely
             reader.skipCurrentElement();
         }
     }
 
-    if (!string.isEmpty()) {
-        const auto index { string_list_.size() };
-        string_list_.append(string);
-        string_index_hash_.insert(string, index);
-    }
+    // IMPORTANT: even empty string is valid sharedString
+    const auto index { string_list_.size() };
+    string_list_.append(string);
+    string_index_hash_.insert(string, index);
 }
 
 bool SharedString::ParseXml(QIODevice* device)

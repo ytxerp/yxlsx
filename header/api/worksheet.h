@@ -74,11 +74,11 @@ public:
 
             const CellType cell_type { DetermineCellType(qvalue) };
 
-            if (cell_type != CellType::kUnknown) {
+            if (cell_type != CellType::kEmpty) {
                 auto cell { QSharedPointer<Cell>::create(qvalue, cell_type) };
 
                 if (cell_type == CellType::kSharedString) {
-                    shared_string_->SetSharedString(qvalue.toString(), current_row, column);
+                    shared_string_->SetSharedString(qvalue.toString());
                 }
 
                 WriteMatrix(current_row, column, cell);
@@ -109,11 +109,11 @@ public:
 
             const CellType cell_type { DetermineCellType(qvalue) };
 
-            if (cell_type != CellType::kUnknown) {
+            if (cell_type != CellType::kEmpty) {
                 auto cell { QSharedPointer<Cell>::create(qvalue, cell_type) };
 
                 if (cell_type == CellType::kSharedString) {
-                    shared_string_->SetSharedString(qvalue.toString(), row, current_column);
+                    shared_string_->SetSharedString(qvalue.toString());
                 }
 
                 WriteMatrix(row, current_column, cell);
@@ -154,18 +154,6 @@ private:
     mutable QHash<int, QString> row_spans_hash_ {};
     SheetFormatProps sheet_format_props_ {};
     QMap<std::pair<int, int>, QSharedPointer<Cell>> matrix_ {};
-
-    static constexpr std::array<std::pair<int, CellType>, 9> type_map = { {
-        { QMetaType::QString, CellType::kSharedString },
-        { QMetaType::Int, CellType::kNumber },
-        { QMetaType::UInt, CellType::kNumber },
-        { QMetaType::LongLong, CellType::kNumber },
-        { QMetaType::ULongLong, CellType::kNumber },
-        { QMetaType::Double, CellType::kNumber },
-        { QMetaType::Float, CellType::kNumber },
-        { QMetaType::Bool, CellType::kBoolean },
-        { QMetaType::QDateTime, CellType::kDate },
-    } };
 };
 
 QT_END_NAMESPACE_YXLSX

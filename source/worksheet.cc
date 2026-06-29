@@ -122,18 +122,19 @@ bool Worksheet::Write(int row, int column, const QVariant& data)
     if (!Utility::IsValidRowColumn(row, column))
         return false;
 
-    if (data.isNull() || !UpdateDimension(row, column)) {
+    if (data.isNull())
         return false;
-    }
 
-    CellType cell_type { DetermineCellType(data) };
-    if (cell_type == CellType::kUnknown)
+    if (!UpdateDimension(row, column))
         return false;
+
+    const CellType cell_type { DetermineCellType(data) };
 
     auto cell { QSharedPointer<Cell>::create(data, cell_type) };
 
-    if (cell_type == CellType::kSharedString)
-        shared_string_->SetSharedString(data.toString(), row, column);
+    if (cell_type == CellType::kSharedString) {
+        shared_string_->SetSharedString(data.toString());
+    }
 
     WriteMatrix(row, column, cell);
     return true;
@@ -141,20 +142,31 @@ bool Worksheet::Write(int row, int column, const QVariant& data)
 
 CellType Worksheet::DetermineCellType(const QVariant& value) const
 {
-    if (!value.isValid() || value.isNull()) {
-        qWarning() << "Invalid or null QVariant provided.";
-        return CellType::kUnknown;
-    }
+    if (!value.isValid())
+        return CellType::kEmpty;
 
-    const int kTypeID { value.typeId() };
-    for (const auto& [meta_type, cell_type] : type_map) {
-        if (kTypeID == meta_type) {
-            return cell_type;
-        }
-    }
+    switch (value.typeId()) {
+    case QMetaType::Bool:
+        return CellType::kBoolean;
 
-    qWarning() << "Unsupported QVariant type:" << value.typeName();
-    return CellType::kUnknown;
+    case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong:
+    case QMetaType::Double:
+    case QMetaType::Float:
+        return CellType::kNumber;
+
+    case QMetaType::QDateTime:
+        return CellType::kDateTime;
+
+    case QMetaType::QString:
+        return CellType::kSharedString;
+
+    default:
+        qWarning() << "Unsupported QVariant type:" << value.typeName();
+        return CellType::kSharedString; // Excel safest fallback
+    }
 }
 
 /*!
@@ -308,11 +320,9 @@ void Worksheet::ComposeSheet(QXmlStreamWriter& writer) const
 void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QSharedPointer<Cell>& cell) const
 {
     Q_ASSERT(cell);
-    if (!cell->value.isValid() || cell->value.isNull())
-        return;
 
     // This is the innermost loop so efficiency is important.
-    QString coord = Utility::ComposeCoordinate(row, col);
+    const QString coord { Utility::ComposeCoordinate(row, col) };
 
     writer.writeStartElement(QLatin1String("c"));
     writer.writeAttribute(QLatin1String("r"), coord);
@@ -320,18 +330,30 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
     // -------------------
     // Set style index to small font + shrinkToFit
     // -------------------
-    writer.writeAttribute(QLatin1String("s"), QString::number(1)); // All cells use shrinkToFit style
+    writer.writeAttribute(QLatin1String("s"), QString::number(kDefaultStyleIndex)); // All cells use shrinkToFit style
+
+    // Empty cell must still be written
+    if (cell->type == CellType::kEmpty) {
+        writer.writeEndElement();
+        return;
+    }
 
     switch (cell->type) {
     case CellType::kSharedString: { // 's'
         int shared_string_index { shared_string_->GetSharedStringIndex(cell->value.toString()) };
+
+        if (shared_string_index < 0) {
+            qWarning() << "Missing shared string:" << cell->value.toString();
+            shared_string_index = 0; // or fallback safe value
+        }
+
         writer.writeAttribute(QLatin1String("t"), QLatin1String("s"));
         writer.writeTextElement(QLatin1String("v"), QString::number(shared_string_index));
         break;
     }
     case CellType::kNumber: { // 'n'
         writer.writeAttribute(QLatin1String("t"), QLatin1String("n"));
-        writer.writeTextElement(QLatin1String("v"), QString::number(cell->value.toDouble(), 'g', 15));
+        writer.writeTextElement(QLatin1String("v"), QString::number(cell->value.toDouble(), 'f', 15));
         break;
     }
     case CellType::kBoolean: { // 'b'
@@ -339,13 +361,13 @@ void Worksheet::ComposeCell(QXmlStreamWriter& writer, int row, int col, const QS
         writer.writeTextElement(QLatin1String("v"), cell->value.toBool() ? QLatin1String("1") : QLatin1String("0"));
         break;
     }
-    case CellType::kDate: {
+    case CellType::kDateTime: {
         writer.writeAttribute(QLatin1String("t"), QLatin1String("d"));
-        writer.writeTextElement(QLatin1String("v"), cell->value.toDateTime().toString(Qt::ISODate));
+        writer.writeTextElement(QLatin1String("v"), cell->value.toDateTime().toString(Qt::ISODateWithMs));
         break;
     }
     default:
-        qDebug() << "Unknown CellType encountered!";
+        qWarning() << "Unsupported CellType";
         break;
     }
 
@@ -423,7 +445,7 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader, int row, int& column)
         } else if (type == QLatin1String("b")) {
             cell_type = CellType::kBoolean;
         } else if (type == QLatin1String("d")) {
-            cell_type = CellType::kDate;
+            cell_type = CellType::kDateTime;
         } // otherwise keep default Number
     }
 
@@ -455,7 +477,7 @@ QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type, int
     case CellType::kSharedString: {
         int index = value.toInt();
         if (shared_string_) {
-            shared_string_->IncrementReference(index, row, column);
+            shared_string_->IncrementReference(index);
             return shared_string_->GetSharedString(index);
         } else {
             qWarning() << "SharedString object is null, returning raw value at"
@@ -467,7 +489,7 @@ QVariant Worksheet::ParseCellValue(const QString& value, CellType cell_type, int
         const QString lower = value.toLower();
         return QVariant(lower == QLatin1String("true") || lower == QLatin1String("1"));
     }
-    case CellType::kDate: {
+    case CellType::kDateTime: {
         QDateTime dt = QDateTime::fromString(value, Qt::ISODate);
         if (!dt.isValid()) {
             qWarning() << "Invalid date value:" << value << "at row:" << row << "column:" << column;

@@ -30,12 +30,12 @@
 
 QT_BEGIN_NAMESPACE_YXLSX
 
-class Coordinate {
+class Coordinate final {
 public:
     Coordinate() = default;
 
     explicit Coordinate(int row, int column);
-    Coordinate(const QString& coordinate);
+    explicit Coordinate(const QString& coordinate);
     Coordinate(const char* coordinate);
 
     inline void SetRow(int row) { row_ = row; }

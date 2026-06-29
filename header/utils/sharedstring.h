@@ -41,13 +41,10 @@ class SharedString final : public AbstractOOXmlFile {
 public:
     explicit SharedString(OperationMode mode);
 
-    int SetSharedString(const QString& string, int row, int column);
-    void IncrementReference(int index, int row, int column);
-
-    QSet<std::pair<int, int>> RemoveSharedString(const QString& string, int row, int column);
+    void SetSharedString(const QString& string);
+    void IncrementReference(int index);
 
     inline int GetSharedStringIndex(const QString& string) const { return string_index_hash_.value(string, -1); }
-    inline const QList<QString>& GetSharedString() const { return string_list_; }
     inline bool IsEmpty() const { return string_list_.isEmpty(); }
 
     QString GetSharedString(int index) const;
@@ -78,16 +75,7 @@ private:
      */
     QHash<QString, int> string_index_hash_ {};
 
-    /**
-     * @brief string_coordinate_hash_
-     *
-     * Maintains a mapping between shared strings and the cell coordinates
-     * where they are used. Each string is associated with a nested hash table,
-     * where the keys represent row numbers and the values represent column numbers.
-     * @note The index of a shared string can change over time as new strings are added or removed.
-     *       Therefore, using the index as a key is not recommended.
-     */
-    QHash<QString, QSet<std::pair<int, int>>> string_coordinate_hash_ {};
+    QHash<QString, int> string_count_hash_ {};
 };
 
 QT_END_NAMESPACE_YXLSX

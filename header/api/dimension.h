@@ -30,13 +30,12 @@
 
 QT_BEGIN_NAMESPACE_YXLSX
 
-class Dimension {
+class Dimension final {
 public:
     Dimension() = default;
 
-    Dimension(int top_row, int left_column, int bottom_row, int right_column);
+    explicit Dimension(int top_row, int left_column, int bottom_row, int right_column);
     explicit Dimension(const QString& dimension);
-    explicit Dimension(const char* dimension);
 
     QString ComposeDimension(bool row_abs = false, bool col_abs = false) const;
 

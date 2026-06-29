@@ -41,8 +41,6 @@ Dimension::Dimension(int top_row, int left_column, int bottom_row, int right_col
 
 Dimension::Dimension(const QString& dimension) { Init(dimension); }
 
-Dimension::Dimension(const char* dimension) { Init(QString::fromLatin1(dimension)); }
-
 void Dimension::Init(const QString& dimension)
 {
     // Reset to invalid first
