@@ -35,6 +35,7 @@
 #include "namespace.h"
 #include "sharedstring.h"
 #include "sheetformatprops.h"
+#include "utility.h"
 
 YXLSX_BEGIN_NAMESPACE
 

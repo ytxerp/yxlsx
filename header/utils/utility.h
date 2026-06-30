@@ -29,9 +29,18 @@
 
 YXLSX_BEGIN_NAMESPACE
 
+struct CellAddress {
+    int row { -1 };
+    int column { -1 };
+    bool valid { false };
+
+    bool IsValid() const { return valid; }
+    bool IsBeforeOrEqual(const CellAddress& other) const { return row <= other.row && column <= other.column; }
+};
+
 class Utility {
 public:
-    static std::pair<int, int> ParseCoordinate(const QString& coordinate);
+    static CellAddress ParseCoordinate(const QString& coordinate);
     static QString ComposeCoordinate(int row, int column, bool row_abs = false, bool col_abs = false);
     static QStringList SplitPath(const QString& path);
     static QString GetRelFilePath(const QString& filePath);
@@ -40,16 +49,9 @@ public:
     static QString UnescapeSheetName(const QString& sheetName);
 
     static bool IsSpacePreserveNeeded(const QString& string);
-
-    static constexpr bool IsValidRowColumn(int row, int column) { return row >= 1 && row <= kExcelRowMax && column >= 1 && column <= kExcelColumnMax; }
-    static bool IsValidCellRange(int top_row, int left_column, int bottom_row, int right_column)
-    {
-        return Utility::IsValidRowColumn(top_row, left_column) && Utility::IsValidRowColumn(bottom_row, right_column) && top_row <= bottom_row
-            && left_column <= right_column;
-    }
+    static constexpr bool IsValidRowColumn(int row, int column) { return row >= 1 && row <= kMaxExcelRow && column >= 1 && column <= kMaxExcelColumn; }
 
 private:
-    static int ParseColumn(const QString& column);
     static QString ComposeColumn(int column);
 };
 

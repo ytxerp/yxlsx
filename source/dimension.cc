@@ -31,14 +31,6 @@
 
 YXLSX_BEGIN_NAMESPACE
 
-Dimension::Dimension(int top_row, int left_column, int bottom_row, int right_column)
-    : top_row_ { top_row }
-    , left_column_ { left_column }
-    , bottom_row_ { bottom_row }
-    , right_column_ { right_column }
-{
-}
-
 Dimension::Dimension(const QString& dimension) { Init(dimension); }
 
 void Dimension::Init(const QString& dimension)
@@ -63,16 +55,21 @@ void Dimension::Init(const QString& dimension)
     const auto start { Utility::ParseCoordinate(parts.first()) };
     const auto end { Utility::ParseCoordinate(parts.size() == 2 ? parts.last() : parts.first()) };
 
-    if (!Utility::IsValidCellRange(start.first, start.second, end.first, end.second)) {
-        qWarning() << "Invalid dimension coordinates." << dimension;
+    if (!start.IsValid() || !end.IsValid()) {
+        qWarning() << "Invalid coordinate in range:" << dimension;
+        return;
+    }
+
+    if (!start.IsBeforeOrEqual(end)) {
+        qWarning() << "Invalid range order (must be top-left -> bottom-right):" << dimension;
         return;
     }
 
     // Initialize the row and column range.
-    top_row_ = start.first;
-    left_column_ = start.second;
-    bottom_row_ = end.first;
-    right_column_ = end.second;
+    top_row_ = start.row;
+    left_column_ = start.column;
+    bottom_row_ = end.row;
+    right_column_ = end.column;
 }
 
 QString Dimension::ComposeDimension(bool row_abs, bool col_abs) const

@@ -31,8 +31,8 @@
 #define YXLSX_END_NAMESPACE }
 
 inline constexpr int kInvalidValue = -1;
-inline constexpr int kExcelRowMax = 1048576;
-inline constexpr int kExcelColumnMax = 16384;
+inline constexpr int kMaxExcelRow = 1048576;
+inline constexpr int kMaxExcelColumn = 16384;
 inline const QString kDefaultXlsxName(QStringLiteral("Book1.xlsx"));
 inline constexpr int kDefaultStyleIndex = 1;
 

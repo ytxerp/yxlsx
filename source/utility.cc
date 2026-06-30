@@ -140,68 +140,120 @@ bool Utility::IsSpacePreserveNeeded(const QString& s)
     return s.front().isSpace() || s.back().isSpace() || s.contains(QStringLiteral("  "));
 }
 
-std::pair<int, int> Utility::ParseCoordinate(const QString& coordinate)
+CellAddress Utility::ParseCoordinate(const QString& coordinate)
 {
+    CellAddress result {};
+
     if (coordinate.isEmpty())
-        return {};
+        return result;
 
-    static const QRegularExpression re(QRegularExpression::anchoredPattern(QStringLiteral(R"(\$?([A-Za-z]{1,3})\$?(\d+))")));
+    const int n = coordinate.size();
+    int i = 0;
 
-    int row {};
-    int column {};
-
-    const QRegularExpressionMatch match = re.match(coordinate);
-    if (!match.hasMatch()) {
-        return { kInvalidValue, kInvalidValue };
-    }
-
-    const QString col_str = match.captured(1);
-    const QString row_str = match.captured(2);
-
-    row = row_str.toInt();
-    column = ParseColumn(col_str);
-
-    if (row <= 0 || column <= 0) {
-        return { kInvalidValue, kInvalidValue };
-    }
-
-    return { row, column };
-}
-
-int Utility::ParseColumn(const QString& column)
-{
-    if (column.isEmpty()) {
-        return kInvalidValue;
-    }
-
+    // -------------------------
+    // 1. parse column letters
+    // -------------------------
     int col = 0;
-    for (QChar ch : column) {
-        if (!ch.isLetter()) {
-            return kInvalidValue;
+    bool has_column = false;
+
+    while (i < n) {
+        const QChar ch = coordinate[i];
+
+        if (ch == u'$') {
+            ++i;
+            continue;
         }
 
-        col = col * 26 + (ch.toUpper().unicode() - 'A' + 1);
+        if (ch.isLetter()) {
+            has_column = true;
+            col = col * 26 + (ch.toUpper().unicode() - u'A' + 1);
+            ++i;
+        } else {
+            break;
+        }
     }
 
-    return col;
+    if (!has_column)
+        return result;
+
+    // -------------------------
+    // 2. parse row digits
+    // -------------------------
+    int row = 0;
+    bool has_row = false;
+
+    while (i < n) {
+        const QChar ch = coordinate[i];
+
+        if (ch == u'$') {
+            ++i;
+            continue;
+        }
+
+        if (ch.isDigit()) {
+            has_row = true;
+            row = row * 10 + (ch.unicode() - u'0');
+            ++i;
+        } else {
+            return result; // invalid char
+        }
+    }
+
+    if (!has_row)
+        return result;
+
+    // -------------------------
+    // 3. validation (Excel bounds)
+    // -------------------------
+    if (row <= 0 || col <= 0)
+        return result;
+
+    if (row > kMaxExcelRow || col > kMaxExcelColumn)
+        return result;
+
+    result.row = row;
+    result.column = col;
+    result.valid = true;
+
+    return result;
 }
 
 QString Utility::ComposeCoordinate(int row, int column, bool row_abs, bool col_abs)
 {
-    if (row <= 0 || column <= 0)
+    if (row <= 0 || row > kMaxExcelRow || column <= 0 || column > kMaxExcelColumn) {
+        qWarning() << "Invalid Excel coordinate:" << row << column;
         return {};
+    }
 
-    return (col_abs ? QLatin1String("$") : QLatin1String("")) + ComposeColumn(column) + (row_abs ? QLatin1String("$") : QLatin1String(""))
-        + QString::number(row);
+    QString result {};
+    result.reserve(16);
+
+    if (col_abs)
+        result += QLatin1Char('$');
+
+    result += ComposeColumn(column);
+
+    if (row_abs)
+        result += QLatin1Char('$');
+
+    result += QString::number(row);
+
+    return result;
 }
 
 QString Utility::ComposeColumn(int column)
 {
+    if (column <= 0 || column > kMaxExcelColumn) {
+        qWarning() << "Invalid Excel column:" << column;
+        return {};
+    }
+
     QString col_str {};
+    col_str.reserve(4);
 
     while (column > 0) {
-        int remainder = (column - 1) % 26;
-        col_str.prepend(QChar('A' + remainder));
+        const int remainder { (column - 1) % 26 };
+        col_str.prepend(QChar(u'A' + remainder));
         column = (column - 1) / 26;
     }
 

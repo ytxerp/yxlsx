@@ -40,7 +40,7 @@ YXLSX_BEGIN_NAMESPACE
 void Worksheet::CalculateSpans() const
 {
     row_spans_hash_.clear();
-    int span_min = kExcelColumnMax + 1;
+    int span_min = kMaxExcelColumn + 1;
     int span_max = -1;
 
     for (int row_num = dimension_.TopRow(); row_num <= dimension_.BottomRow(); row_num++) {
@@ -61,7 +61,7 @@ void Worksheet::CalculateSpans() const
         if (row_num % 16 == 0 || row_num == dimension_.BottomRow()) {
             if (span_max != -1) {
                 row_spans_hash_[row_num / 16] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
-                span_min = kExcelColumnMax + 1;
+                span_min = kMaxExcelColumn + 1;
                 span_max = -1;
             }
         }
@@ -85,15 +85,8 @@ bool Worksheet::UpdateDimension(int row, int col)
     if (!Utility::IsValidRowColumn(row, col))
         return false;
 
-    Q_ASSERT_X(row > 0, "UpdateDimension", "Row index must be 1 or greater.");
-    Q_ASSERT_X(col > 0, "UpdateDimension", "Column index must be 1 or greater.");
-
     // Update the dimension if the new row or column extends beyond current bounds.
-    dimension_.SetTopRow(row);
-    dimension_.SetBottomRow(row);
-    dimension_.SetLeftColumn(col);
-    dimension_.SetRightColumn(col);
-
+    dimension_.Extend(row, col);
     return true;
 }
 
@@ -178,7 +171,7 @@ CellType Worksheet::DetermineCellType(const QVariant& value, StringType string_t
 bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data, StringType string_type)
 {
     // Ensure the coordinate is valid before proceeding
-    if (!Coordinate::IsValid(coordinate))
+    if (!coordinate.IsValid())
         return false;
 
     // Delegate to the row-column-based Write method
@@ -193,7 +186,7 @@ bool Worksheet::Write(const Coordinate& coordinate, const QVariant& data, String
 QVariant Worksheet::Read(const Coordinate& coordinate) const
 {
     // Check if the provided coordinate is valid
-    if (!Coordinate::IsValid(coordinate))
+    if (!coordinate.IsValid())
         return QVariant();
 
     // Delegate to the row and column-based Read function
@@ -433,7 +426,7 @@ void Worksheet::ProcessCell(QXmlStreamReader& reader)
     const QString cell_reference { attributes.value(QLatin1String("r")).toString() };
     const Coordinate coord { cell_reference };
 
-    if (!Coordinate::IsValid(coord)) {
+    if (!coord.IsValid()) {
         qWarning() << "Invalid cell reference:" << cell_reference << "at line" << reader.lineNumber() << "column" << reader.columnNumber();
         reader.skipCurrentElement();
         return;

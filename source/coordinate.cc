@@ -49,16 +49,16 @@ void Coordinate::Init(const QString& coordinate)
         return;
 
     // Parse the coordinate string into row and column using Utility::ParseCoordinate
-    auto coord { Utility::ParseCoordinate(coordinate) };
+    const auto address { Utility::ParseCoordinate(coordinate) };
 
-    if (!Utility::IsValidRowColumn(coord.first, coord.second)) {
-        qWarning() << "Invalid coordinate:" << coordinate << "Row:" << coord.first << "Column:" << coord.second;
+    if (!address.IsValid()) {
+        qWarning() << "Invalid CellAddress:" << coordinate << "Row:" << address.row << "Column:" << address.column;
         return;
     }
 
     // Assign the parsed row and column values
-    row_ = coord.first;
-    column_ = coord.second;
+    row_ = address.row;
+    column_ = address.column;
 }
 
 YXLSX_END_NAMESPACE

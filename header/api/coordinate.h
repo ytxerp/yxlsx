@@ -26,27 +26,24 @@
 #define YXLSX_COORDINATE_H
 
 #include "namespace.h"
-#include "utility.h"
 
 YXLSX_BEGIN_NAMESPACE
 
 class Coordinate final {
 public:
     Coordinate() = default;
+    Coordinate(const char* coordinate);
 
     explicit Coordinate(int row, int column);
     explicit Coordinate(const QString& coordinate);
-    Coordinate(const char* coordinate);
 
-    inline void SetRow(int row) { row_ = row; }
-    inline void SetColumn(int col) { column_ = col; }
     inline int Row() const { return row_; }
     inline int Column() const { return column_; }
 
     inline bool operator==(const Coordinate& other) const { return row_ == other.row_ && column_ == other.column_; }
     inline bool operator!=(const Coordinate& other) const { return !(*this == other); }
 
-    static constexpr bool IsValid(const Coordinate& coordinate) { return Utility::IsValidRowColumn(coordinate.Row(), coordinate.Column()); }
+    inline bool IsValid() const { return row_ >= 1 && row_ <= kMaxExcelRow && column_ >= 1 && column_ <= kMaxExcelColumn; }
 
 private:
     void Init(const QString& coordinate);

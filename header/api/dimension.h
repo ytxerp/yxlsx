@@ -26,52 +26,40 @@
 #define YXLSX_DIMENSION_H
 
 #include "namespace.h"
-#include "utility.h"
 
 YXLSX_BEGIN_NAMESPACE
 
 class Dimension final {
 public:
     Dimension() = default;
-
-    explicit Dimension(int top_row, int left_column, int bottom_row, int right_column);
     explicit Dimension(const QString& dimension);
 
     QString ComposeDimension(bool row_abs = false, bool col_abs = false) const;
 
-    inline bool IsValid() const { return Utility::IsValidCellRange(top_row_, left_column_, bottom_row_, right_column_); }
+    inline bool IsValid() const
+    {
+        return top_row_ != kInvalidValue && left_column_ != kInvalidValue && bottom_row_ != kInvalidValue && right_column_ != kInvalidValue && top_row_ >= 1
+            && bottom_row_ >= top_row_ && left_column_ >= 1 && right_column_ >= left_column_ && bottom_row_ <= kMaxExcelRow && right_column_ <= kMaxExcelColumn;
+    }
 
     inline int TopRow() const { return top_row_; }
     inline int BottomRow() const { return bottom_row_; }
     inline int LeftColumn() const { return left_column_; }
     inline int RightColumn() const { return right_column_; }
 
-    inline void SetTopRow(int row)
+    inline void Extend(int row, int col)
     {
-        if (top_row_ == kInvalidValue || row < top_row_) {
-            top_row_ = row;
-        }
-    }
+        // -------------------------
+        // Row (top / bottom)
+        // -------------------------
+        top_row_ = (top_row_ == kInvalidValue) ? row : std::min(top_row_, row);
+        bottom_row_ = (bottom_row_ == kInvalidValue) ? row : std::max(bottom_row_, row);
 
-    inline void SetBottomRow(int row)
-    {
-        if (bottom_row_ == kInvalidValue || row > bottom_row_) {
-            bottom_row_ = row;
-        }
-    }
-
-    inline void SetLeftColumn(int col)
-    {
-        if (left_column_ == kInvalidValue || col < left_column_) {
-            left_column_ = col;
-        }
-    }
-
-    inline void SetRightColumn(int col)
-    {
-        if (right_column_ == kInvalidValue || col > right_column_) {
-            right_column_ = col;
-        }
+        // -------------------------
+        // Column (left / right)
+        // -------------------------
+        left_column_ = (left_column_ == kInvalidValue) ? col : std::min(left_column_, col);
+        right_column_ = (right_column_ == kInvalidValue) ? col : std::max(right_column_, col);
     }
 
 private:
