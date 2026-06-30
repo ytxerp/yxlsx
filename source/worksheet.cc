@@ -40,31 +40,40 @@ YXLSX_BEGIN_NAMESPACE
 void Worksheet::CalculateSpans() const
 {
     row_spans_hash_.clear();
+    if (matrix_.isEmpty())
+        return;
+
+    int current_block = -1;
     int span_min = kMaxExcelColumn + 1;
     int span_max = -1;
 
-    for (int row_num = dimension_.TopRow(); row_num <= dimension_.BottomRow(); row_num++) {
-        for (int col_num = dimension_.LeftColumn(); col_num <= dimension_.RightColumn(); col_num++) {
-            if (Contains(row_num, col_num)) {
-                // Update the span for the current row
-                if (span_max == -1) {
-                    span_min = col_num;
-                    span_max = col_num;
-                } else {
-                    span_min = qMin(span_min, col_num);
-                    span_max = qMax(span_max, col_num);
-                }
-            }
-        }
+    for (auto row_it = matrix_.cbegin(); row_it != matrix_.cend(); ++row_it) {
+        int row = row_it.key();
+        int block = (row - 1) / 16;
 
-        // After every 16 rows or at the last row, record the span and reset for the next block
-        if (row_num % 16 == 0 || row_num == dimension_.BottomRow()) {
-            if (span_max != -1) {
-                row_spans_hash_[row_num / 16] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
-                span_min = kMaxExcelColumn + 1;
-                span_max = -1;
+        const auto& cols = row_it.value();
+        if (cols.isEmpty())
+            continue;
+
+        const int row_min = cols.firstKey();
+        const int row_max = cols.lastKey();
+
+        if (block != current_block) {
+            if (current_block != -1 && span_max != -1) {
+                row_spans_hash_[current_block] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
             }
+
+            current_block = block;
+            span_min = row_min;
+            span_max = row_max;
+        } else {
+            span_min = std::min(span_min, row_min);
+            span_max = std::max(span_max, row_max);
         }
+    }
+
+    if (current_block != -1 && span_max != -1) {
+        row_spans_hash_[current_block] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
     }
 }
 
@@ -268,44 +277,28 @@ void Worksheet::ComposeXml(QIODevice* device) const
 
 void Worksheet::ComposeSheet(QXmlStreamWriter& writer) const
 {
-    // Ensure spans are calculated before writing
     CalculateSpans();
 
-    const int bottom { dimension_.BottomRow() };
-    const int left { dimension_.LeftColumn() };
+    for (auto row_it = matrix_.cbegin(); row_it != matrix_.cend(); ++row_it) {
+        const int row = row_it.key();
+        const auto& cols = row_it.value();
 
-    for (int row = dimension_.TopRow(); row <= bottom; ++row) {
-        // Determine the span attribute for the current row
-        QString span {};
-        int span_index = (row - 1) / 16;
-        if (auto span_it = row_spans_hash_.constFind(span_index); span_it != row_spans_hash_.constEnd()) {
-            span = span_it.value();
-        }
+        if (cols.isEmpty())
+            continue;
 
-        // Start the row element
         writer.writeStartElement(QLatin1String("row"));
         writer.writeAttribute(QLatin1String("r"), QString::number(row));
-        if (!span.isEmpty()) {
-            writer.writeAttribute(QLatin1String("spans"), span);
+
+        if (auto span_it = row_spans_hash_.constFind((row - 1) / 16); span_it != row_spans_hash_.constEnd()) {
+            writer.writeAttribute(QLatin1String("spans"), span_it.value());
         }
 
-        // Write cell data for the row if it contains any cells
-        for (auto it = matrix_.lowerBound({ row, left }); it != matrix_.constEnd(); ++it) {
-            const auto& coord { it.key() };
-
-            // If the current row number is greater than the target row number, no need to continue
-            if (coord.first > row) {
-                break;
-            }
-
-            // Process only the cells in the target row
-            // Ensure the cell pointer is valid and contains valid data before writing
-            if (it.value() && it.value()->value.isValid()) {
-                ComposeCell(writer, row, coord.second, *it);
-            }
+        for (auto col_it = cols.cbegin(); col_it != cols.cend(); ++col_it) {
+            const auto& cell = col_it.value();
+            if (cell && cell->value.isValid())
+                ComposeCell(writer, row, col_it.key(), cell);
         }
 
-        // End the row element
         writer.writeEndElement();
     }
 }

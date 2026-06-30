@@ -143,12 +143,25 @@ private:
     void ParseSheet(QXmlStreamReader& reader);
     void ParseRow(QXmlStreamReader& reader);
 
-    inline void WriteMatrix(int row, int column, const QSharedPointer<Cell>& cell) { matrix_.insert({ row, column }, cell); }
-    inline QSharedPointer<Cell> ReadMatrix(int row, int column) const { return matrix_.value({ row, column }); }
+    inline void WriteMatrix(int row, int column, const QSharedPointer<Cell>& cell) { matrix_[row][column] = cell; }
+    inline QSharedPointer<Cell> ReadMatrix(int row, int column) const
+    {
+        auto it = matrix_.constFind(row);
+        if (it == matrix_.constEnd())
+            return {};
+
+        return it->value(column);
+    }
+    inline bool Contains(int row, int column) const
+    {
+        auto it = matrix_.constFind(row);
+        if (it == matrix_.constEnd())
+            return false;
+
+        return it->contains(column);
+    }
 
     bool WriteBlank(int row, int column);
-
-    inline bool Contains(int row, int column) const { return matrix_.contains({ row, column }); }
     CellType DetermineCellType(const QVariant& value, StringType string_type = StringType::kSharedString) const;
 
 private:
@@ -156,7 +169,7 @@ private:
     QSharedPointer<SharedString> shared_string_ {};
     mutable QHash<int, QString> row_spans_hash_ {};
     SheetFormatProps sheet_format_props_ {};
-    QMap<std::pair<int, int>, QSharedPointer<Cell>> matrix_ {};
+    QMap<int, QMap<int, QSharedPointer<Cell>>> matrix_ {};
 };
 
 YXLSX_END_NAMESPACE
