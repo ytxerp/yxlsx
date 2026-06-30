@@ -42,11 +42,6 @@ public:
             && bottom_row_ >= top_row_ && left_column_ >= 1 && right_column_ >= left_column_ && bottom_row_ <= kMaxExcelRow && right_column_ <= kMaxExcelColumn;
     }
 
-    inline int TopRow() const { return top_row_; }
-    inline int BottomRow() const { return bottom_row_; }
-    inline int LeftColumn() const { return left_column_; }
-    inline int RightColumn() const { return right_column_; }
-
     inline void Extend(int row, int col)
     {
         // -------------------------
@@ -61,9 +56,6 @@ public:
         left_column_ = (left_column_ == kInvalidValue) ? col : std::min(left_column_, col);
         right_column_ = (right_column_ == kInvalidValue) ? col : std::max(right_column_, col);
     }
-
-private:
-    void Init(const QString& dimension);
 
 private:
     int top_row_ { kInvalidValue };

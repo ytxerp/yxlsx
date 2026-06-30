@@ -30,53 +30,6 @@
 
 YXLSX_BEGIN_NAMESPACE
 
-/*!
- * Calculates the "spans" attribute for the <row> tag in XLSX. This is an optimization for faster comparison
- * of Excel files and is not strictly required for the file's validity. The span defines the range of columns
- * occupied in a row, and the rows are grouped into blocks of 16 for this calculation.
-
- * The span for each block of 16 rows is stored in the row_spans_ map, with the key being the block number.
- */
-void Worksheet::CalculateSpans() const
-{
-    row_spans_hash_.clear();
-    if (matrix_.isEmpty())
-        return;
-
-    int current_block = -1;
-    int span_min = kMaxExcelColumn + 1;
-    int span_max = -1;
-
-    for (auto row_it = matrix_.cbegin(); row_it != matrix_.cend(); ++row_it) {
-        int row = row_it.key();
-        int block = (row - 1) / 16;
-
-        const auto& cols = row_it.value();
-        if (cols.isEmpty())
-            continue;
-
-        const int row_min = cols.firstKey();
-        const int row_max = cols.lastKey();
-
-        if (block != current_block) {
-            if (current_block != -1 && span_max != -1) {
-                row_spans_hash_[current_block] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
-            }
-
-            current_block = block;
-            span_min = row_min;
-            span_max = row_max;
-        } else {
-            span_min = std::min(span_min, row_min);
-            span_max = std::max(span_max, row_max);
-        }
-    }
-
-    if (current_block != -1 && span_max != -1) {
-        row_spans_hash_[current_block] = QStringLiteral("%1:%2").arg(span_min).arg(span_max);
-    }
-}
-
 QString Worksheet::ComposeDimension() const
 {
     if (!dimension_.IsValid())
@@ -277,8 +230,6 @@ void Worksheet::ComposeXml(QIODevice* device) const
 
 void Worksheet::ComposeSheet(QXmlStreamWriter& writer) const
 {
-    CalculateSpans();
-
     for (auto row_it = matrix_.cbegin(); row_it != matrix_.cend(); ++row_it) {
         const int row = row_it.key();
         const auto& cols = row_it.value();
@@ -286,12 +237,9 @@ void Worksheet::ComposeSheet(QXmlStreamWriter& writer) const
         if (cols.isEmpty())
             continue;
 
-        writer.writeStartElement(QLatin1String("row"));
-        writer.writeAttribute(QLatin1String("r"), QString::number(row));
-
-        if (auto span_it = row_spans_hash_.constFind((row - 1) / 16); span_it != row_spans_hash_.constEnd()) {
-            writer.writeAttribute(QLatin1String("spans"), span_it.value());
-        }
+        writer.writeStartElement(QStringLiteral("row"));
+        writer.writeAttribute(QStringLiteral("r"), QString::number(row));
+        writer.writeAttribute(QStringLiteral("spans"), QStringLiteral("%1:%2").arg(cols.firstKey()).arg(cols.lastKey()));
 
         for (auto col_it = cols.cbegin(); col_it != cols.cend(); ++col_it) {
             const auto& cell = col_it.value();

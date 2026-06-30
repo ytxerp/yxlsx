@@ -135,7 +135,6 @@ private:
 
     bool UpdateDimension(int row, int col);
     QString ComposeDimension() const;
-    void CalculateSpans() const;
 
     void ComposeSheet(QXmlStreamWriter& writer) const;
     void ComposeCell(QXmlStreamWriter& writer, int row, int col, const QSharedPointer<Cell>& cell) const;
@@ -167,7 +166,6 @@ private:
 private:
     Dimension dimension_ {};
     QSharedPointer<SharedString> shared_string_ {};
-    mutable QHash<int, QString> row_spans_hash_ {};
     SheetFormatProps sheet_format_props_ {};
     QMap<int, QMap<int, QSharedPointer<Cell>>> matrix_ {};
 };

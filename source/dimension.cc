@@ -31,16 +31,8 @@
 
 YXLSX_BEGIN_NAMESPACE
 
-Dimension::Dimension(const QString& dimension) { Init(dimension); }
-
-void Dimension::Init(const QString& dimension)
+Dimension::Dimension(const QString& dimension)
 {
-    // Reset to invalid first
-    top_row_ = kInvalidValue;
-    left_column_ = kInvalidValue;
-    bottom_row_ = kInvalidValue;
-    right_column_ = kInvalidValue;
-
     // Split the dimension string by ':' into parts.
     const QStringList parts { dimension.split(QLatin1Char(':'), Qt::SkipEmptyParts) };
 
